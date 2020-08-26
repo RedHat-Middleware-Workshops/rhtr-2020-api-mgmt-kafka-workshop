@@ -1,0 +1,14 @@
+version: '3'
+services:
+  mongodb:
+        image: mongo:latest
+        container_name: "iot-lab-mongodb"
+        environment:
+          - MONGO_DATA_DIR=/data/db
+          - MONGO_LOG_DIR=/dev/null
+          - MONGO_INITDB_DATABASE=city-info
+          - MONGO_INITDB_ROOT_USERNAME=mongodb
+          - MONGO_INITDB_ROOT_PASSWORD=password
+        ports:
+            - 27017:27017
+        command: mongod

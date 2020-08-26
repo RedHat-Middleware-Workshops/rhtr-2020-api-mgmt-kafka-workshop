@@ -1,0 +1,23 @@
+"""
+@model
+@datasync
+"""
+type Junction {
+  id: ID!
+  uuid: String!
+  name: String!
+  latitude: String!
+  longitude: String!
+}
+
+""" 
+@model
+@datasync
+"""
+type Meter {
+  id: ID!
+  uuid: String!
+  address: String!
+  latitude: String!
+  longitude: String!
+}
