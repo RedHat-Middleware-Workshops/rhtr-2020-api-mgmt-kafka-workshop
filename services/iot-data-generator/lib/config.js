@@ -6,8 +6,7 @@ const { get } = require('env-var')
 
 const SUPPORTED_TRANSPORTS = {
   CONSOLE: 'console',
-  KAFKA: 'kafka',
-  AQMP: 'amqp'
+  KAFKA: 'kafka'
 }
 
 module.exports = {
