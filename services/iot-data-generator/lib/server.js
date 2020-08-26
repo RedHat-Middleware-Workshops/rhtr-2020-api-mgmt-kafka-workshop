@@ -2,12 +2,13 @@
 
 require('make-promises-safe')
 
-const createGenerator = require('./generate')
+const createGenerator = require('./generator')
+const createDataloader = require('./dataloader')
 const express = require('express')
 const log = require('barelog')
 const { HTTP_PORT } = require('./config')
 
-function startServer (generator) {
+function startServer (dataloader) {
   const app = express()
 
   // Mounts liveness/readiness probes
@@ -16,11 +17,11 @@ function startServer (generator) {
   app.use(require('compression')())
 
   app.get('/meters', (req, res) => {
-    res.json(generator.getMeters())
+    res.json(dataloader.getMeters())
   })
 
   app.get('/junctions', (req, res) => {
-    res.json(generator.getMeters())
+    res.json(dataloader.getMeters())
   })
 
   app.get('/', (req, res) => {
@@ -43,6 +44,7 @@ function startServer (generator) {
 }
 
 (async function main () {
-  const generator = await createGenerator()
-  startServer(generator)
+  const dataloader = await createDataloader()
+  await createGenerator(dataloader.getJunctions(), dataloader.getMeters())
+  startServer(dataloader)
 })()

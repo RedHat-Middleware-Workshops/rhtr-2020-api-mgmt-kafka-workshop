@@ -6,13 +6,13 @@ class Junction {
   /**
    * Junction properties
    * @param {Object} props
-   * @param {string} props.id
+   * @param {string} props.uuid
    * @param {string} props.name
    * @param {number} props.latitude
    * @param {number} props.longitude
    */
   constructor (props) {
-    assert(typeof props.id === 'number', 'Junction ID must be a number')
+    assert(typeof props.uuid === 'string', 'Junction uuid must be a string')
     assert(typeof props.latitude === 'number', 'Junction lat/long must be a number')
     assert(typeof props.longitude === 'number', 'Junction lat/long must be a number')
     assert(typeof props.name === 'string', 'Junction name must be a string')
@@ -21,8 +21,8 @@ class Junction {
     this.weight = undefined
   }
 
-  get id () {
-    return this.props.id
+  get uuid () {
+    return this.props.uuid
   }
 
   /**

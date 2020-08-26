@@ -14,13 +14,13 @@ class Meter {
   /**
    * Meter properties
    * @param {Object} props
-   * @param {string} props.id
+   * @param {string} props.uuid
    * @param {string} props.address
    * @param {number} props.latitude
    * @param {number} props.longitude
    */
   constructor (props) {
-    assert(typeof props.id === 'number', 'Meter ID must be a number')
+    assert(typeof props.uuid === 'string', 'Meter uuid must be a string')
     assert(typeof props.latitude === 'number', 'Meter lat/long must be a number')
     assert(typeof props.longitude === 'number', 'Meter lat/long must be a number')
     assert(typeof props.address === 'string', 'Meter address must be a string')
@@ -29,8 +29,8 @@ class Meter {
     this.status = Meter.STATES.AVAILABLE
   }
 
-  get id () {
-    return this.props.id
+  get uuid () {
+    return this.props.uuid
   }
 
   /**

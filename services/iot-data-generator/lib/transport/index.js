@@ -1,10 +1,8 @@
 'use strict'
 
 const log = require('barelog')
-const psql = require('./psql')
 const console = require('./console')
 const kafka = require('./kafka')
-const amqp = require('./kafka')
 const { TRANSPORT_MODE, SUPPORTED_TRANSPORTS } = require('../config')
 
 // We cache the chosen transport object after the initial setup to
@@ -21,17 +19,11 @@ module.exports = function getTransport () {
     log('using kafka transport')
     transport = kafka()
     return transport
-  } else if (TRANSPORT_MODE === SUPPORTED_TRANSPORTS.PSQL) {
-    log('using psql transport')
-    transport = psql()
-    return transport
-  } else if (TRANSPORT_MODE === SUPPORTED_TRANSPORTS.AQMP) {
-    log('using amqp transport')
-    transport = amqp()
-    return transport
-  } else {
+  } else if (TRANSPORT_MODE === SUPPORTED_TRANSPORTS.CONSOLE) {
     log('using console transport')
     transport = console()
     return transport
+  } else {
+    throw new Error(`Invalid TRANSPORT_MODE value found in the environment: "${transport}"`)
   }
 }

@@ -1,11 +1,8 @@
 'use strict'
 
 const log = require('barelog')
-const csv = require('csvtojson')
 const weightedRandom = require('weighted-random')
-const { resolve } = require('path')
 const getTransport = require('./transport')
-const Junction = require('./classes/junction')
 const Meter = require('./classes/meter')
 
 const SEND_INTERVAL_MS = 10 * 1000
@@ -36,15 +33,15 @@ const meterStateWeights = [
 /**
  * Creates a generator instance. Currently this uses internal timers to
  * update meter and junction state information
+ * @param {Junction[]} junctionList
+ * @param {Meter[]} meterList
  */
-module.exports = async function createGenerator () {
+module.exports = async function createGenerator (junctionList, meterList) {
   log('creating data generator')
 
   let meterIdx = 0
   let junctionIdx = 0
 
-  const junctionList = await loadJunctions()
-  const meterList = await loadMeters()
   const transport = await getTransport()
 
   // Assign random weights to junctions on startup
@@ -92,53 +89,6 @@ module.exports = async function createGenerator () {
       transport.insertMeterUpdate(meterId, timestamp, status)
     })
   }, SEND_INTERVAL_MS)
-
-  return {
-    getMeters: () => meterList,
-    getJunctions: () => junctionList
-  }
-}
-
-/**
- * Parses the CSV data in junction_info.csv to JSON and instantiates
- * Junction instances using this data.
- * @returns {Junction[]}
- */
-async function loadJunctions () {
-  log('reading junction csv and instantiating Junction instances')
-  const csvJunctionData = await csv().fromFile(
-    resolve(__dirname, '../data/junction_info.csv')
-  )
-
-  return csvJunctionData.map((data) => {
-    return new Junction({
-      id: parseInt(data.id),
-      name: data.junction_name,
-      latitude: parseFloat(data.latitude),
-      longitude: parseFloat(data.longitude)
-    })
-  })
-}
-
-/**
- * Parses the CSV data in meter_info.csv to JSON and instantiates
- * Meter instances using this data.
- * @returns {Meter[]}
- */
-async function loadMeters () {
-  log('reading meter csv and instantiating Junction instances')
-  const csvMeterData = await csv().fromFile(
-    resolve(__dirname, '../data/meter_info.csv')
-  )
-
-  return csvMeterData.map((data) => {
-    return new Meter({
-      id: parseInt(data.id),
-      address: data.address,
-      latitude: parseFloat(data.latitude),
-      longitude: parseFloat(data.longitude)
-    })
-  })
 }
 
 /**
@@ -148,7 +98,7 @@ async function loadMeters () {
 function generateStateForJunction (j) {
   const min = j.weight * 0.20
   const timestamp = getTimestamp()
-  const junctionId = parseInt(j.id)
+  const junctionId = j.uuid
   const counts = {
     ew: Math.round(Math.max(min, Math.random() * j.weight)),
     ns: Math.round(Math.max(min, Math.random() * j.weight))
@@ -166,7 +116,7 @@ function generateStateForJunction (j) {
 function generateStateForMeter (m) {
   const timestamp = getTimestamp()
   const status = getWeightedRandomMeterStatus().text
-  const meterId = m.id
+  const meterId = m.uuid
 
   // A side-effect, yuck!
   m.status = status

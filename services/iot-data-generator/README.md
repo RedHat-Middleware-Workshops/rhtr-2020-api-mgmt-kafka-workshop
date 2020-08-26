@@ -1,56 +1,35 @@
 # RHTR 2020 Lab IoT Data Generator
 
-## About
+## What it does
 
-This application simulates the IoT sensor network for the lab.
+* Seeds the backing IoT MongoDB instance with data.
+* Simulates the IoT sensor network for the lab.
 
-### Strategy
+## Simulation Specifics
 
-1. Once per minute an "update" function is executed
-1. This updates the state of each parking meter and junction
-1. The new state is flushed to a "transport"
+1. Once per minute an "update" function is executed.
+1. This updates the state of each parking meter and junction.
+1. The new state is flushed to a **[transport]**. This is defined via environment variables.
 
-Currently this generates a large volume of data. We can revise this to reduce
-the total number of meters, junctions, and the update frequency.
-
-### Data Structures
-
-Generates Meter and Junction payloads that conform to the spec
-described [at this link](/DATA_STRUCTURES.md).
-
-The parking meter "status" field in payloads are weighted such that the
-following states and probabilities are possible for meters:
-
-* ~50% occupied
-* ~20% available
-* ~20% unknown
-* ~10% out-of-service
-
-Similarly, junctions are assigned a weight on initialisation to simulate the
-idea that some intersections are busier than others.
-
-### Transports
-
-Data can be written to the following:
-
-* Kafka Topics
-* PostgreSQL Tables
-* AMQP (provided by AMQ Online)
-* stdout/console (default)
+Currently this generates a large volume of data. We can revise this strategy to
+control the flow/frequency of updates.
 
 Configure this by setting a `TRANSPORT_MODE` environment variable.
 
 ## Requirements
 
-* Node.js 10+
-* Docker 18+
+* Node.js v12
+* Docker Community v19
+* OpenShift 4.5
 
-## Configuration
+## Configuration via Environment Variables
 
-* `TRANSPORT_MODE` - Set to `kafka`, `psql`, `amqp` or `console`. Defaults to
-`console`.
-* `PG_CONNECTION_STRING` - If `TRANSPORT_MODE` is set to `psql` this will be
-used to connect to PostgreSQL. Defaults to `postgresql://rhtr-admin:changethistosomethingelse@postgresql.city-of-losangeles.svc:5432/city-info`
+The default values for these variables can be found in *lib/config.js*.
+
+* `TRANSPORT_MODE`: Determines where IoT data is written to. Set to `kafka` or `console`.
+* `HTTP_PORT`: Port the HTTP server listens on.
+* `KAFKA_HOST`: Kafka broker(s) connection string.
+* `MONGO_CONNECTION_STRING`: Connection string for MongoDB.
 
 ## Run Locally with Node.js
 
@@ -58,7 +37,7 @@ Run the following from this directory (the one containing a *package.json*):
 
 ```bash
 npm install
-npm start
+npm run dev
 ```
 
 The generator will begin to print data on the console by default.
@@ -77,10 +56,14 @@ npm run nodeshift
 
 The npm registry variables passed in the example are optional.
 
-```
+```bash
 export TAGNAME=rhtr-2020-kafka-amp-iot-datagen
 
-docker build --build-arg NPM_REGISTRY_URL=$REG_URL --build-arg NPM_CAFILE_URL=$REG_CA_URL . -t dil-streaming-earth-dashboard
+# Note: the --build-arg flags are only required if using a custom npm registry
+docker build \
+--build-arg NPM_REGISTRY_URL=$REG_URL \
+--build-arg NPM_CAFILE_URL=$REG_CA_URL \
+. -t rhtr-2020-kafka-amp-iot-datagen
 
 docker run rhtr-2020-kafka-amp-iot-datagen:latest
 ```
