@@ -73,7 +73,9 @@ const config = {
       template: 'src/template.html'
     }),
     new DefinePlugin({
-      'process.env.IOT_GRAPHQL_HOST': JSON.stringify(process.env.IOT_GRAPHQL_HOST)
+      'process.env.IOT_GRAPHQL_HOST': JSON.stringify(
+        process.env.IOT_GRAPHQL_HOST
+      )
     })
   ],
   resolve: {

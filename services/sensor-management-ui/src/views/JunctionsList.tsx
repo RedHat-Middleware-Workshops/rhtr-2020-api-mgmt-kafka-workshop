@@ -6,6 +6,6 @@ const JunctionsListView: React.FC = () => {
       <h2>JUNCTIONS VIEW</h2>
     </div>
   );
-}
+};
 
 export default JunctionsListView;
