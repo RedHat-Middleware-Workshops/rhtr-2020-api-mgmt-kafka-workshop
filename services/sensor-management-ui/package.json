@@ -1,0 +1,64 @@
+{
+  "name": "rhte-sensor-management-ui",
+  "version": "1.0.0",
+  "description": "UI used to manage the sensor network used in the lab",
+  "main": "index.js",
+  "keywords": [],
+  "author": "Evan Shortiss <evanshortiss@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "npm run build:prod",
+    "build:dev": "webpack -d --mode development",
+    "build:prod": "NODE_ENV=production webpack -p --mode production",
+    "docker:build": "s2i build -c . quay.io/evanshortiss/s2i-nodejs-nginx:14 $npm_package_name & echo \"Build complete. Tagged as $npm_package_name\"",
+    "clean": "rm dist/bundle.js",
+    "format": "prettier src/**/*.tsx *.config.js --trailing-comma=none --single-quote --write",
+    "start": "npx serve -l 8080 dist/",
+    "dev": "IOT_GRAPHQL_HOST=http://localhost:8081/graphql webpack-dev-server --hot --mode development",
+    "test": "mocha"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.1.4",
+    "graphql": "^15.3.0",
+    "react": "~16.13.1",
+    "react-dom": "~16.13.1",
+    "react-hot-loader": "~4.12.21",
+    "react-router-dom": "^5.2.0",
+    "react-transition-group": "^4.4.1",
+    "tailwindcss": "~1.4.6"
+  },
+  "devDependencies": {
+    "@hot-loader/react-dom": "~16.13.0+4.12.20",
+    "@types/react": "~16.9.43",
+    "@types/react-dom": "~16.9.8",
+    "@types/react-router-dom": "^5.1.5",
+    "@types/react-transition-group": "^4.4.0",
+    "autoprefixer": "~9.8.5",
+    "clean-webpack-plugin": "~3.0.0",
+    "css-loader": "~3.6.0",
+    "file-loader": "~6.0.0",
+    "html-loader": "~1.1.0",
+    "html-webpack-plugin": "~4.3.0",
+    "mocha": "~8.0.1",
+    "postcss-loader": "~3.0.0",
+    "prettier": "~2.0.5",
+    "style-loader": "~1.2.1",
+    "ts-loader": "~8.0.0",
+    "typescript": "~3.9.6",
+    "url-loader": "~4.1.0",
+    "webpack": "~4.43.0",
+    "webpack-cli": "~3.3.12",
+    "webpack-dev-server": "~3.11.0"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evanshortiss/rhtr-2020-api-mgmt-kafka.git"
+  },
+  "bugs": {
+    "url": "https://github.com/evanshortiss/rhtr-2020-api-mgmt-kafka/issues"
+  },
+  "homepage": "https://github.com/evanshortiss/rhtr-2020-api-mgmt-kafka#readme"
+}
