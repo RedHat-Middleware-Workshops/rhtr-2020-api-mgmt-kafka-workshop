@@ -3,30 +3,11 @@ import config from './config'
 import log from 'barelog'
 
 export async function connectDB() {
-  let url: string
+  log('connecting to MongoDB')
 
-  const {
-    DB_USER,
-    DB_PASSWORD,
-    DB_HOST,
-    DB_PORT,
-    DB_DATABASE,
-    DB_AUTHSOURCE
-  } = config.MONGODB
+  const mongoClient = await MongoClient.connect(config.MONGO_CONNECTION_STRING)
 
-  if (DB_USER && DB_PASSWORD) {
-    log('connecting to MongoDB with authentication')
-    url = `mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?authSource=${DB_AUTHSOURCE}`
-  } else {
-    log('connecting to MongoDB without authentication')
-    url = `mongodb://${DB_HOST}:${DB_PORT}/${DB_DATABASE}`
-  }
-
-  const mongoClient = await MongoClient.connect(url, {
-    useUnifiedTopology: true
-  })
-
-  const db = mongoClient.db(DB_DATABASE)
+  const db = mongoClient.db('city-info')
 
   return db
 }

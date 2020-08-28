@@ -13,10 +13,20 @@ import {
 import express from 'express'
 import { PubSub } from 'graphql-subscriptions'
 import { connectDB } from './db'
+import { HTTP_RESPONSE_DELAY, HTTP_PORT } from './config'
 
 async function start() {
   const app = express()
+  const httpServer = http.createServer(app)
 
+  app.use((req, res, next) => {
+    if (HTTP_RESPONSE_DELAY) {
+      // Simulate a request with a slow response time
+      setTimeout(() => next(), HTTP_RESPONSE_DELAY)
+    } else {
+      next()
+    }
+  })
   app.use(require('cors')())
   app.use(require('compression')())
 
@@ -39,12 +49,15 @@ async function start() {
   })
 
   apolloServer.applyMiddleware({ app })
-
-  const httpServer = http.createServer(app)
   apolloServer.installSubscriptionHandlers(httpServer)
 
-  httpServer.listen({ port: 4000 }, () => {
-    log(`🚀 server ready at http://localhost:4000/graphql`)
+  // Always redirect / to the /graphql endpoint
+  app.get('/', (req, res) => {
+    res.redirect('/graphql')
+  })
+
+  httpServer.listen({ port: HTTP_PORT }, () => {
+    log(`🚀 server ready at http://localhost:${HTTP_PORT}/graphql`)
   })
 }
 

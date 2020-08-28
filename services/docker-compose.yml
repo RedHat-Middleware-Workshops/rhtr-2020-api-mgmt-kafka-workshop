@@ -1,0 +1,43 @@
+version: '3'
+services:
+  iot-data-generator:
+    container_name: iot-lab-data-generator
+    build:
+      context: iot-data-generator/
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment: 
+      - HTTP_PORT=8082
+      - MONGO_CONNECTION_STRING=mongodb://mongodb:password@city-mongodb:27017/
+  iot-graphql-api:
+    container_name: iot-lab-graphql-api
+    build:
+      context: iot-graphql-api/
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment: 
+      - HTTP_PORT=8081
+      - MONGO_CONNECTION_STRING=mongodb://mongodb:password@city-mongodb:27017/
+  iot-sensor-management-ui:
+    container_name: iot-lab-sensor-management-ui
+    build:
+      context: sensor-management-ui/
+      dockerfile: Dockerfile
+      args: 
+        - IOT_GRAPHQL_HOST=http://localhost:8081/graphql
+    ports:
+      - "8080:8080"
+  city-mongodb:
+    image: mongo:latest
+    container_name: iot-lab-mongodb
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+      - MONGO_INITDB_DATABASE=city-info
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    ports:
+        - 27017:27017
+    command: mongod

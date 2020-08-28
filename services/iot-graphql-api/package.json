@@ -6,9 +6,9 @@
   "main": "dist/src/index.js",
   "scripts": {
     "build": "tsc",
-    "develop": "ts-node -r dotenv/config src/index.ts",
+    "dev": "ts-node -r dotenv/config src/index.ts",
     "format": "prettier --write --no-semi --trailing-comma=none --single-quote src/**/*.ts",
-    "start": "node -r dotenv/config dist/src/index.js",
+    "start": "node -r dotenv/config dist/index.js",
     "watch": "tsc -w"
   },
   "license": "Apache 2.0",

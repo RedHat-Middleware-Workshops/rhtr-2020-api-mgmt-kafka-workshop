@@ -33,9 +33,14 @@ module.exports = async function createDataloader () {
  * @param {MongoClient.db}
  */
 async function insertJunctions (junctions, db) {
-  log('inserting junctions into mongodb')
   const collection = db.collection('junction')
-  await collection.drop()
+  log('drop existing junctions collection')
+  try {
+    await collection.drop()
+  } catch (e) {
+    log(e)
+  }
+  log('inserting junctions into mongodb')
   await collection.insertMany(junctions.map(j => j.toJSON()), { ordered: true })
 }
 
@@ -47,7 +52,11 @@ async function insertJunctions (junctions, db) {
 async function insertMeters (meters, db) {
   log('inserting meters into mongodb')
   const collection = db.collection('meter')
-  await collection.drop()
+  try {
+    await collection.drop()
+  } catch (e) {
+    log(e)
+  }
   await collection.insertMany(meters.map(m => {
     const data = m.toJSON()
     return {
