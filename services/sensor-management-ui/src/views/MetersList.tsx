@@ -64,7 +64,7 @@ const MetersListView: React.FC<MeterListViewProps> = (props) => {
       return;
     }
 
-    props.history.push(`/meters/?search=${searchTermValue}`);
+    props.history.push(`/meters/?search=${searchTermValue.toUpperCase()}`);
   };
 
   const clearSearch = () => {
