@@ -35,6 +35,9 @@ git clone git@github.com:evanshortiss/rhtr-2020-api-mgmt-kafka.git rhtr-2020-lab
 
 cd rhtr-2020-lab/services
 
+# Pass any non-empty string for GOOGLE_MAPS_API_KEY if you don't have a key, but
+# note that the maps feature in the UI will display an error
+docker-compose build --build-arg GOOGLE_MAPS_API_KEY=<an-api-key>
 docker-compose up -d
 ```
 
@@ -44,7 +47,7 @@ If you make changes to the services themselves, you can rebuild and redeploy
 like so:
 
 ```bash
-docker-compose build
+docker-compose build --build-arg GOOGLE_MAPS_API_KEY=<an-api-key>
 docker-compose up -d
 ```
 
