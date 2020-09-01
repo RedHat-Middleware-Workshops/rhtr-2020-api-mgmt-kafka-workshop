@@ -1,5 +1,9 @@
 # RHTR 2020 - Services
 
+## Arcitecture
+
+![Lab Architecture Diagram](/images/architecture.png)
+
 ## Services List
 
 The following is a list of the services deployed during the lab, and the
