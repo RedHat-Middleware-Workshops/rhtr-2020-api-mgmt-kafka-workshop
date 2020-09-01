@@ -13,15 +13,16 @@ import {
 import express from 'express'
 import { PubSub } from 'graphql-subscriptions'
 import { connectDB } from './db'
-import { HTTP_RESPONSE_DELAY, HTTP_PORT } from './config'
+import { HTTP_RESPONSE_DELAY, HTTP_PORT, NODE_ENV } from './config'
 
 async function start() {
   const app = express()
   const httpServer = http.createServer(app)
 
   app.use((req, res, next) => {
-    if (HTTP_RESPONSE_DELAY) {
-      // Simulate a request with a slow response time
+    if (HTTP_RESPONSE_DELAY && NODE_ENV !== 'prod') {
+      // Simulate a request with a slow response time.
+      // Will always be disabled in production, even if HTTP_RESPONSE_DELAY is set.
       setTimeout(() => next(), HTTP_RESPONSE_DELAY)
     } else {
       next()
