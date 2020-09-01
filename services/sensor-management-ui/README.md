@@ -11,7 +11,7 @@ First install dependencies:
 npm install
 
 # run in hot module reloading mode
-npm run dev
+GOOGLE_MAPS_API_KEY=<key goes here> npm run dev
 ```
 
 ## Create a Production Bundle

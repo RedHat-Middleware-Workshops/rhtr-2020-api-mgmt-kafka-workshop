@@ -29,11 +29,10 @@ const App: React.FC = () => {
           <Nav />
           <main className="mb-auto h-10">
             <Switch>
-              {/* Note that "exact" is required. Without it the view never updates 🤷‍♂️ */}
               <Route exact path={"/"} component={HomeView} />
               <Route exact path={"/junctions"} component={JunctionsListView} />
               <Route exact path={"/meters"} component={MetersListView} />
-              <Route path={"/meters/:meterId"} component={MeterDetailView} />
+              <Route path={"/meters/:id"} component={MeterDetailView} />
               <Route component={NotFoundView} />
             </Switch>
           </main>

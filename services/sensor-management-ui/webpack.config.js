@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const { get } = require('env-var');
 const { DefinePlugin } = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -74,7 +75,10 @@ const config = {
     }),
     new DefinePlugin({
       'process.env.IOT_GRAPHQL_HOST': JSON.stringify(
-        process.env.IOT_GRAPHQL_HOST
+        get('IOT_GRAPHQL_HOST').required().asUrlString()
+      ),
+      'process.env.GOOGLE_MAPS_API_KEY': JSON.stringify(
+        get('GOOGLE_MAPS_API_KEY').required().asString()
       )
     })
   ],
