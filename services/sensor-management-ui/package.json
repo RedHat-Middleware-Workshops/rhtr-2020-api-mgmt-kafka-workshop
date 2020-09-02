@@ -1,5 +1,5 @@
 {
-  "name": "rhte-sensor-management-ui",
+  "name": "rhtr-2020-sensor-management-ui",
   "version": "1.0.0",
   "description": "UI used to manage the sensor network used in the lab",
   "main": "index.js",
@@ -10,12 +10,14 @@
     "build": "npm run build:prod",
     "build:dev": "webpack -d --mode development",
     "build:prod": "NODE_ENV=production webpack -p --mode production",
-    "docker:build": "s2i build -c . quay.io/evanshortiss/s2i-nodejs-nginx:14 $npm_package_name & echo \"Build complete. Tagged as $npm_package_name\"",
+    "s2i:build": "s2i build -c . quay.io/evanshortiss/s2i-nodejs-nginx:14 $npm_package_name & echo \"Build complete. Tagged as $npm_package_name\"",
+    "docker:build": "docker build . -t quay.io/evanshortiss/$npm_package_name",
     "clean": "rm dist/bundle.js",
     "format": "prettier src/**/*.tsx *.config.js --trailing-comma=none --single-quote --write",
+    "lint": "prettier src/**/*.tsx *.config.js --trailing-comma=none --single-quote --check",
     "start": "npx serve -l 8080 dist/",
     "dev": "IOT_GRAPHQL_HOST=http://localhost:8081/graphql webpack-dev-server --hot --mode development",
-    "test": "prettier src/**/*.tsx *.config.js --trailing-comma=none --single-quote"
+    "test": "npm run lint"
   },
   "dependencies": {
     "@apollo/client": "~3.1.4",
