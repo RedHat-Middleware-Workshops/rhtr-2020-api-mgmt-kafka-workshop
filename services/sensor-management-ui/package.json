@@ -4,7 +4,7 @@
   "description": "UI used to manage the sensor network used in the lab",
   "main": "index.js",
   "keywords": [],
-  "author": "Evan Shortiss <evanshortiss@gmail.com>",
+  "author": "Evan Shortiss <eshortis@redhat.com>",
   "license": "MIT",
   "scripts": {
     "build": "npm run build:prod",
