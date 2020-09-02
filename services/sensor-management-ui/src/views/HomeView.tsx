@@ -1,5 +1,4 @@
 import * as React from 'react';
-import LosAngeles from '../images/martin-adams-los-angeles-unsplash.jpg';
 import {
   FindJunctionQueryResult,
   ALL_JUNCTIONS_QUERY
@@ -57,7 +56,7 @@ const HomeView: React.FC = () => {
         <img
           className="rounded-b-lg"
           style={{ maxHeight: '40vh' }}
-          src={LosAngeles}
+          src="images/martin-adams-los-angeles-unsplash.jpg"
           alt="Downtown Los Angeles"
         />
         <span className="text-white text-opacity-50 text-xs absolute bottom-0 pb-1">

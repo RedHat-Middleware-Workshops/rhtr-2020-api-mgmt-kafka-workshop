@@ -5,6 +5,8 @@ const { get } = require('env-var');
 const { DefinePlugin } = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const DynamicCdnWebpackPlugin = require('dynamic-cdn-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 const config = {
   entry: ['react-hot-loader/patch', './src/index.tsx'],
@@ -41,28 +43,6 @@ const config = {
         exclude: /node_modules/
       },
       {
-        test: /\.png$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: {
-              mimetype: 'image/png'
-            }
-          }
-        ]
-      },
-      {
-        test: /\.jpg$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: {
-              mimetype: 'image/jpeg'
-            }
-          }
-        ]
-      },
-      {
         test: /\.svg$/,
         use: 'file-loader'
       }
@@ -80,6 +60,15 @@ const config = {
       'process.env.GOOGLE_MAPS_API_KEY': JSON.stringify(
         get('GOOGLE_MAPS_API_KEY').required().asString()
       )
+    }),
+    new DynamicCdnWebpackPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'src/images',
+          to: 'images'
+        }
+      ]
     })
   ],
   resolve: {
