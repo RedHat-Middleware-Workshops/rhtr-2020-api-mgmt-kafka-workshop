@@ -6,7 +6,7 @@ const { DefinePlugin } = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const DynamicCdnWebpackPlugin = require('dynamic-cdn-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const config = {
   entry: ['react-hot-loader/patch', './src/index.tsx'],
