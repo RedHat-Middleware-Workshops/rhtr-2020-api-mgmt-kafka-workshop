@@ -220,9 +220,7 @@ const MetersListView: React.FC<MeterListViewProps> = (props) => {
           <tbody>{rows}</tbody>
         </table>
 
-        <div className="text-center pt-6">
-
-        </div>
+        <div className="text-center pt-6"></div>
       </div>
     );
   }

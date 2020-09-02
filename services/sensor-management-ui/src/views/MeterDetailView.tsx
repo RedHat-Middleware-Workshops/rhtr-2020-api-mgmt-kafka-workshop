@@ -68,9 +68,11 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
           <p className="text-xl text-gray-900">{data?.getMeter.uuid}</p>
           <br />
 
-          <h3 className="text-xl text-gray-600">GPS Coordinates</h3>
+          <h3 className="text-xl text-gray-600">
+            GPS Coordinates (Latitude, Longitude)
+          </h3>
           <p className="text-xl text-gray-900">
-            {data?.getMeter.latitude} / {data?.getMeter.longitude}
+            {data?.getMeter.latitude}, {data?.getMeter.longitude}
           </p>
           <br />
         </div>
