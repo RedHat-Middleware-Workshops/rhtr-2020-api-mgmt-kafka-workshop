@@ -7,11 +7,11 @@ on:
   push:
     branches: [ master ]
     paths: 
-      - services/sensor-management-ui
+      - services/sensor-management-ui/*
   pull_request:
     branches: [ master ]
     paths:
-      - services/sensor-management-ui
+      - services/sensor-management-ui/*
 
 jobs:
   build:
