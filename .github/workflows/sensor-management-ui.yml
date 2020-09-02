@@ -12,7 +12,9 @@ on:
     branches: [ master ]
     paths:
       - 'services/sensor-management-ui/**'
-
+defaults:
+  run:
+    working-directory: 'services/sensor-management-ui/'
 jobs:
   build:
 
@@ -24,6 +26,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - working-directory:
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
