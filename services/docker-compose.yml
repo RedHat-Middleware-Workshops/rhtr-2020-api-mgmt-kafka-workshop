@@ -1,6 +1,8 @@
 version: '3'
 services:
   iot-data-generator:
+    networks: 
+      - rhtr-lab
     container_name: iot-lab-data-generator
     build:
       context: iot-data-generator/
@@ -11,6 +13,8 @@ services:
       - HTTP_PORT=8082
       - MONGO_CONNECTION_STRING=mongodb://mongoadmin:mongoadmin@city-mongodb:27017/
   iot-graphql-api:
+    networks: 
+      - rhtr-lab
     container_name: iot-lab-graphql-api
     build:
       context: iot-graphql-api/
@@ -21,6 +25,8 @@ services:
       - HTTP_PORT=8081
       - MONGO_CONNECTION_STRING=mongodb://mongoadmin:mongoadmin@city-mongodb:27017/
   iot-sensor-management-ui:
+    networks: 
+      - rhtr-lab
     container_name: iot-lab-sensor-management-ui
     build:
       context: sensor-management-ui/
@@ -29,10 +35,6 @@ services:
         - IOT_GRAPHQL_HOST=http://localhost:8081/graphql
     ports:
       - "8080:8080"
-  city-mongodb:
-    build:
-      context: mongodb/
-      dockerfile: Dockerfile
-    container_name: iot-lab-mongodb
-    ports:
-        - 27017:27017
+networks:
+  rhtr-lab:
+    external: true

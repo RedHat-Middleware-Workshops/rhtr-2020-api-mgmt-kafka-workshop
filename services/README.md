@@ -35,6 +35,20 @@ git clone git@github.com:evanshortiss/rhtr-2020-api-mgmt-kafka.git rhtr-2020-lab
 
 cd rhtr-2020-lab/services
 
+# Create a network
+docker network create rhtr-lab
+
+# Build, run, and configure MongoDB
+docker build ./mongodb -t rhtr-mongodb
+docker run -d --network rhtr-lab -p 27017:27017 --name city-mongodb rhtr-mongodb
+docker exec -it city-mongodb /bin/bash
+mongo -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD localhost:27017/admin --eval "rs.initiate({ _id: 'rs0', members: [ { _id: 0, host: 'localhost:27017' } ] });"
+```
+
+Type `exit` to exit the `mongo` process, and type `exit` again to leave the
+container. Next start the services:
+
+```bash
 # Pass any non-empty string for GOOGLE_MAPS_API_KEY if you don't have a key, but
 # note that the maps feature in the UI will display an error
 docker-compose build --build-arg GOOGLE_MAPS_API_KEY=<an-api-key>
@@ -123,7 +137,7 @@ after deploying that service:
 * Provides real-time data feed to mobile application.
 * Attendees start with a template and use Che to deploy it.
 
-## Mobile Application (partial pre-deploy)
+### Mobile Application (partial pre-deploy)
 
 * Attendees must reconfigure the *BuildConfig* with:
   * Quarkus SSE Server URL (for real-time data)
