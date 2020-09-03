@@ -8,7 +8,9 @@
     "build": "tsc",
     "dev": "ts-node -r dotenv/config src/index.ts",
     "format": "prettier --write --no-semi --trailing-comma=none --single-quote src/**/*.ts",
+    "lint": "prettier --check --no-semi --trailing-comma=none --single-quote src/**/*.ts",
     "start": "node -r dotenv/config dist/index.js",
+    "test": "npm run lint",
     "watch": "tsc -w"
   },
   "license": "Apache 2.0",
