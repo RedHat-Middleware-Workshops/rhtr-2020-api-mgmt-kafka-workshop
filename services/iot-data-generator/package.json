@@ -25,8 +25,6 @@
     "make-promises-safe": "~5.0.0",
     "mongodb": "~3.6.0",
     "nanoid": "~3.1.12",
-    "pg": "~7.12.1",
-    "uuid": "~8.3.0",
     "weighted-random": "~0.1.0"
   },
   "devDependencies": {
