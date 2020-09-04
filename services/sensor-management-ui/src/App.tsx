@@ -13,9 +13,10 @@ import HomeView from './views/HomeView';
 import Nav from './components/Nav';
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
+import { getGraphqlHost } from './utils';
 
 const client = new ApolloClient({
-  uri: process.env.IOT_GRAPHQL_HOST,
+  uri: getGraphqlHost(),
   cache: new InMemoryCache()
 });
 console.log('connecting to graphql service at', process.env.IOT_GRAPHQL_HOST)
