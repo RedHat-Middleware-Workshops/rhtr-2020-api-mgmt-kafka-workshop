@@ -11,8 +11,10 @@ import GoogleMapReact, { BootstrapURLKeys, MapOptions } from 'google-map-react';
 
 interface RouteMatchParams extends RouteComponentProps<{ id: string }> {}
 
+const GOOGLE_MAPS_KEY_PLACEHOLDER = 'missingkey'
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_KEY_PLACEHOLDER
 const client: BootstrapURLKeys = {
-  key: process.env.GOOGLE_MAPS_API_KEY || '',
+  key: GOOGLE_MAPS_API_KEY,
   client: 'rhtr-sensor-management-ui'
 };
 
@@ -57,6 +59,29 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
       </div>
     );
   } else {
+    let mapEl: JSX.Element
+
+    if (GOOGLE_MAPS_API_KEY === GOOGLE_MAPS_KEY_PLACEHOLDER) {
+      mapEl = (
+        <div className="border-l p-4">
+          <p>A Google Maps view can be rendered here. To enable the map view, visit the <a href="https://console.developers.google.com">Google Developer Console</a> and create a valid API Key with Google Maps enabled.</p>
+          <br/>
+          <p>Once you have a valid API Key, add it to the BuildConfig for this application with the name GOOGLE_MAPS_API_KEY and run a new build.</p>
+        </div>
+      )
+    } else {
+      mapEl = (
+        <GoogleMapReact
+          onGoogleApiLoaded={(m) =>
+            addMarker(m.map as google.maps.Map, data.getMeter)
+          }
+          defaultZoom={14}
+          defaultCenter={getCenter(data.getMeter)}
+          options={options}
+          bootstrapURLKeys={client}
+        ></GoogleMapReact>
+      )
+    }
     content = (
       <div className="flex">
         <div className="flex-1">
@@ -77,15 +102,7 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
           <br />
         </div>
         <div className="flex-1" style={{ height: '50vh' }}>
-          <GoogleMapReact
-            onGoogleApiLoaded={(m) =>
-              addMarker(m.map as google.maps.Map, data.getMeter)
-            }
-            defaultZoom={14}
-            defaultCenter={getCenter(data.getMeter)}
-            options={options}
-            bootstrapURLKeys={client}
-          ></GoogleMapReact>
+          {mapEl}
         </div>
       </div>
     );

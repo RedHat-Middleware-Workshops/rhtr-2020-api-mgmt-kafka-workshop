@@ -55,10 +55,10 @@ const config = {
     }),
     new DefinePlugin({
       'process.env.IOT_GRAPHQL_HOST': JSON.stringify(
-        get('IOT_GRAPHQL_HOST').required().asUrlString()
+        get('IOT_GRAPHQL_HOST').asUrlString()
       ),
       'process.env.GOOGLE_MAPS_API_KEY': JSON.stringify(
-        get('GOOGLE_MAPS_API_KEY').required().asString()
+        get('GOOGLE_MAPS_API_KEY').default('missingkey').asString()
       )
     }),
     new DynamicCdnWebpackPlugin(),
