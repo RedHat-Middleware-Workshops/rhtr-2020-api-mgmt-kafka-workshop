@@ -13,9 +13,6 @@ COPY meter_info.json /docker-entrypoint-initdb.d/meter_info.json
 COPY configure-db.sh /docker-entrypoint-initdb.d/configure-db.sh
 RUN chmod +x /docker-entrypoint-initdb.d/configure-db.sh
 
-RUN useradd someuser -u 1001 -G root
-RUN chown -R 1001:0 /data/db
-
-USER 1001
+RUN chgrp -R root /data/db && chmod -R g=u /data/db
 
 CMD [ "mongod", "--replSet", "rs0", "--auth" ]
