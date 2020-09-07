@@ -3,7 +3,6 @@
 const { resolve } = require('path')
 const csv = require('csvtojson')
 const log = require('barelog')
-const MongoClient = require('mongodb').MongoClient
 const Junction = require('./classes/junction')
 const Meter = require('./classes/meter')
 const { MONGO_CONNECTION_STRING } = require('./config')
@@ -15,11 +14,11 @@ const { MONGO_CONNECTION_STRING } = require('./config')
 module.exports = async function createDataloader () {
   const junctions = await loadJunctions()
   const meters = await loadMeters()
-  const client = await MongoClient.connect(MONGO_CONNECTION_STRING)
-  const db = client.db('city-info')
+  // const client = await MongoClient.connect(MONGO_CONNECTION_STRING)
+  // const db = client.db('city-info')
 
-  await insertJunctions(junctions, db)
-  await insertMeters(meters, db)
+  // await insertJunctions(junctions, db)
+  // await insertMeters(meters, db)
 
   return {
     getMeters: () => meters,

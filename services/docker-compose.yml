@@ -1,5 +1,14 @@
 version: '3'
 services:
+  iot-psql:
+    networks: 
+      - rhtr-lab
+    container_name: iot-lab-psql
+    build:
+      context: postgresql/
+      dockerfile: Dockerfile
+    ports:
+      - "5432:5432"
   iot-data-generator:
     networks: 
       - rhtr-lab
@@ -11,8 +20,10 @@ services:
       - "8082:8082"
     environment: 
       - HTTP_PORT=8082
-      - MONGO_CONNECTION_STRING=mongodb://mongoadmin:mongoadmin@city-mongodb:27017/
+      - PSQL_CONNECTION_STRING=psql://rhtr-user:rhtr-pass@iot-psql:5432/
   iot-graphql-api:
+    depends_on:
+      - iot-psql
     networks: 
       - rhtr-lab
     container_name: iot-lab-graphql-api
@@ -23,7 +34,12 @@ services:
       - "8081:8081"
     environment: 
       - HTTP_PORT=8081
-      - MONGO_CONNECTION_STRING=mongodb://mongoadmin:mongoadmin@city-mongodb:27017/
+      - DB_CLIENT=pg
+      - DB_USER=rhtr-user
+      - DB_PASSWORD=rhtr-pass
+      - DB_DATABASE=city-info
+      - DB_HOST=iot-psql
+      - DB_PORT=5432
   iot-sensor-management-ui:
     networks: 
       - rhtr-lab

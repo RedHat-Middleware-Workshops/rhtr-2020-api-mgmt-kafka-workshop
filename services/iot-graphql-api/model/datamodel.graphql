@@ -1,10 +1,11 @@
 """
 @model
-@datasync
 """
 type Junction {
-  id: ID!
-  uuid: String!
+  """
+  @id
+  """
+  uuid: ID!
   name: String!
   latitude: String!
   longitude: String!
@@ -12,11 +13,12 @@ type Junction {
 
 """ 
 @model
-@datasync
 """
 type Meter {
-  id: ID!
-  uuid: String!
+  """
+  @id
+  """
+  uuid: ID!
   address: String!
   latitude: String!
   longitude: String!

@@ -1,69 +1,57 @@
-import log from 'barelog'
-import path from 'path'
-import http from 'http'
-import { ApolloServer } from 'apollo-server-express'
-import { buildGraphbackAPI } from 'graphback'
-import { loadSchemaSync } from '@graphql-tools/load'
-import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
-import {
-  createDataSyncMongoDbProvider,
-  createDataSyncCRUDService,
-  DataSyncPlugin
-} from '@graphback/datasync'
-import express from 'express'
-import { PubSub } from 'graphql-subscriptions'
-import { connectDB } from './db'
-import { HTTP_RESPONSE_DELAY, HTTP_PORT, NODE_ENV } from './config'
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+require('dotenv').config();
+import { ApolloServer } from 'apollo-server-express';
+import cors from 'cors';
+import express from 'express';
+import http from 'http';
+import { buildGraphbackAPI } from 'graphback';
+import { loadDBConfig, connectDB } from './db';
+import { migrateDB, removeNonSafeOperationsFilter } from 'graphql-migrations';
+import { createKnexDbProvider } from '@graphback/runtime-knex';
+import { loadConfigSync } from 'graphql-config';
 
-async function start() {
-  const app = express()
-  const httpServer = http.createServer(app)
+const app = express();
+const HTTP_PORT = process.env.HTTP_PORT
 
-  app.use((req, res, next) => {
-    if (HTTP_RESPONSE_DELAY && NODE_ENV !== 'prod') {
-      // Simulate a request with a slow response time.
-      // Will always be disabled in production, even if HTTP_RESPONSE_DELAY is set.
-      setTimeout(() => next(), HTTP_RESPONSE_DELAY)
-    } else {
-      next()
-    }
-  })
-  app.use(require('cors')())
-  app.use(require('compression')())
+app.use(cors());
 
-  const modelDefs = loadSchemaSync(path.resolve('./model/*.graphql'), {
-    loaders: [new GraphQLFileLoader()]
-  })
+const graphbackExtension = 'graphback';
+const config = loadConfigSync({
+  extensions: [
+    () => ({
+      name: graphbackExtension
+    })
+  ]
+});
 
-  const db = await connectDB()
+const projectConfig = config.getDefault();
+const graphbackConfig = projectConfig.extension(graphbackExtension);
+const modelDefs = projectConfig.loadSchemaSync(graphbackConfig.model);
 
-  const { typeDefs, resolvers, contextCreator } = buildGraphbackAPI(modelDefs, {
-    dataProviderCreator: createDataSyncMongoDbProvider(db),
-    serviceCreator: createDataSyncCRUDService({ pubSub: new PubSub() }),
-    plugins: [new DataSyncPlugin()]
-  })
+const db = connectDB();
+const dbConfig = loadDBConfig();
 
-  const apolloServer = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context: contextCreator
-  })
+const { typeDefs, resolvers, contextCreator } = buildGraphbackAPI(modelDefs, {
+  dataProviderCreator: createKnexDbProvider(db)
+});
 
-  apolloServer.applyMiddleware({ app })
-  apolloServer.installSubscriptionHandlers(httpServer)
+migrateDB(dbConfig, typeDefs, {
+  operationFilter: removeNonSafeOperationsFilter
+}).then(() => {
+  console.log('Migrated database');
+});
 
-  // Always redirect / to the /graphql endpoint
-  app.get('/', (req, res) => {
-    res.redirect('/graphql')
-  })
+const apolloServer = new ApolloServer({
+  typeDefs,
+  resolvers: [resolvers],
+  context: contextCreator
+});
 
-  httpServer.listen({ port: HTTP_PORT }, () => {
-    log(`🚀 server ready at http://localhost:${HTTP_PORT}/graphql`)
-  })
-}
+apolloServer.applyMiddleware({ app });
 
-start().catch((err) => {
-  log('error starting server')
-  log(err)
-  process.exit(1)
-})
+const httpServer = http.createServer(app);
+apolloServer.installSubscriptionHandlers(httpServer);
+
+httpServer.listen({ port: HTTP_PORT }, () => {
+  console.log(`🚀  Server ready at http://localhost:${HTTP_PORT}/graphql`);
+});
