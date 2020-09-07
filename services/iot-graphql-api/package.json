@@ -1,12 +1,12 @@
 {
-  "name": "iot-graphql-api",
-  "version": "0.16.1",
-  "description": "Graphback runtime template with Apollo Server and PostgreSQL",
+  "name": "rhtr-iot-graphql-api",
+  "version": "0.1.0",
+  "description": "Provides access to Meter and Junction data in a PostgreSQL DB",
   "private": true,
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "develop": "ts-node src/index.ts",
+    "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
     "watch": "tsc -w",
     "codegen": "graphback generate && graphql codegen"
