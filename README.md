@@ -1,4 +1,4 @@
-# RHTR 2020 Kakfa and API Management IoT Lab
+# RHTR 2020 Kafka and API Management IoT Lab
 
 ## Local Deployment
 
