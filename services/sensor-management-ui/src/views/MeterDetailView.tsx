@@ -2,12 +2,18 @@ import * as React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import Loader from '../components/Loader';
 import GoogleMapReact, { BootstrapURLKeys, MapOptions } from 'google-map-react';
-import { useGetMeterQuery, GetMeterQuery, MeterExpandedFieldsFragment, Meter } from '../data-facade';
+import {
+  useGetMeterQuery,
+  GetMeterQuery,
+  MeterExpandedFieldsFragment,
+  Meter
+} from '../data-facade';
 
 interface RouteMatchParams extends RouteComponentProps<{ id: string }> {}
 
-const GOOGLE_MAPS_KEY_PLACEHOLDER = 'missingkey'
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_KEY_PLACEHOLDER
+const GOOGLE_MAPS_KEY_PLACEHOLDER = 'missingkey';
+const GOOGLE_MAPS_API_KEY =
+  process.env.GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_KEY_PLACEHOLDER;
 const client: BootstrapURLKeys = {
   key: GOOGLE_MAPS_API_KEY,
   client: 'rhtr-sensor-management-ui'
@@ -39,7 +45,7 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
     variables: {
       id: props.match.params.id
     }
-  })
+  });
 
   let content: JSX.Element;
 
@@ -56,29 +62,37 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
       </div>
     );
   } else {
-    let mapEl: JSX.Element
-    const meter = data.getMeter
+    let mapEl: JSX.Element;
+    const meter = data.getMeter;
 
     if (GOOGLE_MAPS_API_KEY === GOOGLE_MAPS_KEY_PLACEHOLDER) {
       mapEl = (
         <div className="border-l p-4">
-          <p>A Google Maps view can be rendered here. To enable the map view, visit the <a href="https://console.developers.google.com">Google Developer Console</a> and create a valid API Key with Google Maps enabled.</p>
-          <br/>
-          <p>Once you have a valid API Key, add it to the BuildConfig for this application with the name GOOGLE_MAPS_API_KEY and run a new build.</p>
+          <p>
+            A Google Maps view can be rendered here. To enable the map view,
+            visit the{' '}
+            <a href="https://console.developers.google.com">
+              Google Developer Console
+            </a>{' '}
+            and create a valid API Key with Google Maps enabled.
+          </p>
+          <br />
+          <p>
+            Once you have a valid API Key, add it to the BuildConfig for this
+            application with the name GOOGLE_MAPS_API_KEY and run a new build.
+          </p>
         </div>
-      )
+      );
     } else {
       mapEl = (
         <GoogleMapReact
-          onGoogleApiLoaded={(m) =>
-            addMarker(m.map as google.maps.Map, meter)
-          }
+          onGoogleApiLoaded={(m) => addMarker(m.map as google.maps.Map, meter)}
           defaultZoom={14}
           defaultCenter={getCenter(meter)}
           options={options}
           bootstrapURLKeys={client}
         ></GoogleMapReact>
-      )
+      );
     }
     content = (
       <div className="flex">

@@ -30,7 +30,7 @@ const MetersListView: React.FC<MeterListViewProps> = (props) => {
         offset: parsedQuery.page * PAGE_SIZE
       }
     }
-  })
+  });
 
   // Used to prevent pagination overflow
   const MAX_PAGES = Math.ceil((data?.findMeters.count || 0) / PAGE_SIZE);
