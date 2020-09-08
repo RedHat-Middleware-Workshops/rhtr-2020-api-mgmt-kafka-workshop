@@ -1,6 +1,6 @@
 # RHTR 2020 - Services
 
-## Arcitecture
+## Architecture
 
 ![Lab Architecture Diagram](/images/architecture.png)
 
@@ -62,6 +62,7 @@ like so:
 
 ```bash
 docker-compose build --build-arg GOOGLE_MAPS_API_KEY=<an-api-key>
+docker-compose down
 docker-compose up -d
 ```
 
