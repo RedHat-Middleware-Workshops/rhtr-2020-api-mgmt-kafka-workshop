@@ -1,13 +1,8 @@
 import * as React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import {
-  generateGetByIdQuery,
-  GetMeterQueryResult,
-  Meter
-} from '../data/meters';
-import { useQuery } from '@apollo/client';
 import Loader from '../components/Loader';
 import GoogleMapReact, { BootstrapURLKeys, MapOptions } from 'google-map-react';
+import { useGetMeterQuery, GetMeterQuery, MeterExpandedFieldsFragment, Meter } from '../data-facade';
 
 interface RouteMatchParams extends RouteComponentProps<{ id: string }> {}
 
@@ -40,9 +35,11 @@ function addMarker(map: google.maps.Map, meter: Meter) {
 }
 
 const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
-  const { loading, error, data } = useQuery<GetMeterQueryResult>(
-    generateGetByIdQuery(props.match.params.id)
-  );
+  const { loading, error, data } = useGetMeterQuery({
+    variables: {
+      id: props.match.params.id
+    }
+  })
 
   let content: JSX.Element;
 
@@ -60,6 +57,7 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
     );
   } else {
     let mapEl: JSX.Element
+    const meter = data.getMeter
 
     if (GOOGLE_MAPS_API_KEY === GOOGLE_MAPS_KEY_PLACEHOLDER) {
       mapEl = (
@@ -73,10 +71,10 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
       mapEl = (
         <GoogleMapReact
           onGoogleApiLoaded={(m) =>
-            addMarker(m.map as google.maps.Map, data.getMeter)
+            addMarker(m.map as google.maps.Map, meter)
           }
           defaultZoom={14}
-          defaultCenter={getCenter(data.getMeter)}
+          defaultCenter={getCenter(meter)}
           options={options}
           bootstrapURLKeys={client}
         ></GoogleMapReact>
@@ -86,18 +84,18 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
       <div className="flex">
         <div className="flex-1">
           <h3 className="text-xl text-gray-600">Address</h3>
-          <p className="text-xl text-gray-900">{data?.getMeter.address}</p>
+          <p className="text-xl text-gray-900">{meter.address}</p>
           <br />
 
           <h3 className="text-xl text-gray-600">UUID</h3>
-          <p className="text-xl text-gray-900">{data?.getMeter.uuid}</p>
+          <p className="text-xl text-gray-900">{meter.uuid}</p>
           <br />
 
           <h3 className="text-xl text-gray-600">
             GPS Coordinates (Latitude, Longitude)
           </h3>
           <p className="text-xl text-gray-900">
-            {data?.getMeter.latitude}, {data?.getMeter.longitude}
+            {meter.latitude}, {meter.longitude}
           </p>
           <br />
         </div>

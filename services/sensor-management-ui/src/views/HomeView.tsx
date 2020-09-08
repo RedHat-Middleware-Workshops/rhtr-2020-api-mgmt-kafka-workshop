@@ -1,16 +1,12 @@
 import * as React from 'react';
-import {
-  FindJunctionQueryResult,
-  ALL_JUNCTIONS_QUERY
-} from '../data/junctions';
-import { ALL_METERS_QUERY, FindMeterQueryResult } from '../data/meters';
 import { useQuery } from '@apollo/client';
 import Loader from '../components/Loader';
 import { numberWithCommas } from '../utils';
+import { useFindJunctionsQuery, useFindMetersQuery } from '../data-facade';
 
 const HomeView: React.FC = () => {
-  const jQuery = useQuery<FindJunctionQueryResult>(ALL_JUNCTIONS_QUERY);
-  const mQuery = useQuery<FindMeterQueryResult>(ALL_METERS_QUERY);
+  const jQuery = useFindJunctionsQuery();
+  const mQuery = useFindMetersQuery();
 
   let component;
 

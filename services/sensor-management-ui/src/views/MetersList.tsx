@@ -1,16 +1,11 @@
 import { useState } from 'react';
 import * as React from 'react';
-import { useQuery } from '@apollo/client';
 import Loader from '../components/Loader';
 import { withRouter, RouteComponentProps, Link } from 'react-router-dom';
 import { History } from 'history';
-import {
-  FindMeterQueryResult,
-  generatePagedQuery,
-  generateNameContainsSearchQuery
-} from '../data/meters';
 import { parse, stringify } from 'query-string';
 import { convertToNumberOrDefaultTo, PAGE_SIZE } from '../utils';
+import { useFindMetersQuery } from '../data-facade';
 
 interface MeterListViewProps extends RouteComponentProps {
   history: History;
@@ -22,9 +17,20 @@ const MetersListView: React.FC<MeterListViewProps> = (props) => {
   const [searchTermValue, setSearchTermValue] = useState<string>(
     parsedQuery.search
   );
-  const { loading, error, data } = useQuery<FindMeterQueryResult>(
-    generateGraphQuery()
-  );
+
+  const { loading, error, data } = useFindMetersQuery({
+    variables: {
+      filter: {
+        address: {
+          contains: parsedQuery.search
+        }
+      },
+      page: {
+        limit: PAGE_SIZE,
+        offset: parsedQuery.page * PAGE_SIZE
+      }
+    }
+  })
 
   // Used to prevent pagination overflow
   const MAX_PAGES = Math.ceil((data?.findMeters.count || 0) / PAGE_SIZE);
@@ -40,23 +46,6 @@ const MetersListView: React.FC<MeterListViewProps> = (props) => {
         ? 0
         : convertToNumberOrDefaultTo(pageQueryValue)
     };
-  }
-
-  /**
-   * Generates the GraphQL querystring for the current page render
-   */
-  function generateGraphQuery() {
-    if (parsedQuery.search !== '') {
-      // Query using the given search term
-      return generateNameContainsSearchQuery(
-        parsedQuery.search,
-        parsedQuery.page * PAGE_SIZE,
-        PAGE_SIZE
-      );
-    } else {
-      // Query from the start of all meters
-      return generatePagedQuery(parsedQuery.page * PAGE_SIZE, PAGE_SIZE);
-    }
   }
 
   const applySearch = () => {
@@ -115,15 +104,15 @@ const MetersListView: React.FC<MeterListViewProps> = (props) => {
     // const paging =
     const rows = data?.findMeters.items.map((m, idx) => {
       return (
-        <tr className="hover:bg-gray-200 fade-in" key={m.uuid}>
+        <tr className="hover:bg-gray-200 fade-in" key={m?.uuid}>
           <td className="border px-4 py-2">
-            <Link className="underline text-blue-700" to={`/meters/${m.id}`}>
-              {m.uuid}
+            <Link className="underline text-blue-700" to={`/meters/${m?.uuid}`}>
+              {m?.uuid}
             </Link>
           </td>
-          <td className="border px-4 py-2">{m.address}</td>
+          <td className="border px-4 py-2">{m?.address}</td>
           <td className="border px-4 py-2">
-            {m.latitude},{m.longitude}
+            {m?.latitude},{m?.longitude}
           </td>
           <td className="border px-4 py-2">{'Yes'}</td>
         </tr>

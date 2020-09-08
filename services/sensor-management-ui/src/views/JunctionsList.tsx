@@ -3,15 +3,10 @@ import { useQuery } from '@apollo/client';
 import Loader from '../components/Loader';
 import { withRouter } from 'react-router-dom';
 import { History } from 'history';
-import {
-  FindJunctionQueryResult,
-  ALL_JUNCTIONS_QUERY
-} from '../data/junctions';
+import { useGetJunctionQuery, useFindJunctionsQuery } from '../data-facade';
 
 const JunctionsListView: React.FC<{ history: History }> = ({ history }) => {
-  const { loading, error, data } = useQuery<FindJunctionQueryResult>(
-    ALL_JUNCTIONS_QUERY
-  );
+  const { loading, error, data } = useFindJunctionsQuery();
 
   if (loading) {
     return (
@@ -27,17 +22,17 @@ const JunctionsListView: React.FC<{ history: History }> = ({ history }) => {
     );
   }
 
-  const rows = data?.findJunctions.items.map((m, idx) => {
+  const rows = data?.findJunctions.items.map((j) => {
     return (
       <tr
-        onClick={() => history.push(`/meters/${m.uuid}`)}
+        onClick={() => history.push(`/meters/${j?.uuid}`)}
         className="cursor-pointer hover:bg-gray-200 fade-in"
-        key={m.uuid}
+        key={j?.uuid}
       >
-        <td className="border px-4 py-2">{m.uuid}</td>
-        <td className="border px-4 py-2">{m.name}</td>
+        <td className="border px-4 py-2">{j?.uuid}</td>
+        <td className="border px-4 py-2">{j?.name}</td>
         <td className="border px-4 py-2">
-          {m.latitude},{m.longitude}
+          {j?.latitude},{j?.longitude}
         </td>
         <td className="border px-4 py-2">{'Yes'}</td>
       </tr>

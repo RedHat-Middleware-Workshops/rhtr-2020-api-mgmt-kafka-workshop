@@ -1,0 +1,65 @@
+fragment JunctionFields on Junction {
+   uuid
+   name
+   latitude
+   longitude
+
+} 
+
+fragment JunctionExpandedFields on Junction {
+   uuid
+   name
+   latitude
+   longitude
+
+} 
+
+fragment MeterFields on Meter {
+   uuid
+   address
+   latitude
+   longitude
+
+} 
+
+fragment MeterExpandedFields on Meter {
+   uuid
+   address
+   latitude
+   longitude
+
+} 
+
+query findJunctions($filter: JunctionFilter, $page: PageRequest, $orderBy: OrderByInput) {
+    findJunctions(filter: $filter, page: $page, orderBy: $orderBy) {
+      items {
+        ...JunctionExpandedFields
+      }
+      offset
+      limit
+      count
+    }
+  }
+
+query getJunction($id: ID!) {
+    getJunction(id: $id) {
+      ...JunctionExpandedFields
+    }
+  }
+
+query findMeters($filter: MeterFilter, $page: PageRequest, $orderBy: OrderByInput) {
+    findMeters(filter: $filter, page: $page, orderBy: $orderBy) {
+      items {
+        ...MeterExpandedFields
+      }
+      offset
+      limit
+      count
+    }
+  }
+
+query getMeter($id: ID!) {
+    getMeter(id: $id) {
+      ...MeterExpandedFields
+    }
+  }
