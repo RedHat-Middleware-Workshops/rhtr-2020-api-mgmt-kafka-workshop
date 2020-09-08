@@ -1,7 +1,7 @@
 import Knex from 'knex'
 
 export function loadDBConfig() {
-  let port;
+  let port
   if (process.env.DB_PORT) {
     port = parseInt(process.env.DB_PORT, 10)
   }
@@ -15,7 +15,7 @@ export function loadDBConfig() {
       port: port && !isNaN(port) ? port : 5432
     },
     pool: { min: 5, max: 30 }
-  };
+  }
 }
 
 export function connectDB() {
