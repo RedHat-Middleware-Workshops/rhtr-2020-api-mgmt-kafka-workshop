@@ -6,10 +6,12 @@ on:
     branches: [ master ]
     paths:
       - 'services/iot-data-generator/**'
+      - '.github/workflows/iot-data-generator.yml'
   pull_request:
     branches: [ master ]
     paths:
       - 'services/iot-data-generator/**'
+      - '.github/workflows/iot-data-generator.yml'
 defaults:
   run:
     working-directory: 'services/iot-data-generator/'
