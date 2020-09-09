@@ -14,11 +14,6 @@ const { MONGO_CONNECTION_STRING } = require('./config')
 module.exports = async function createDataloader () {
   const junctions = await loadJunctions()
   const meters = await loadMeters()
-  // const client = await MongoClient.connect(MONGO_CONNECTION_STRING)
-  // const db = client.db('city-info')
-
-  // await insertJunctions(junctions, db)
-  // await insertMeters(meters, db)
 
   return {
     getMeters: () => meters,
@@ -81,7 +76,7 @@ async function loadJunctions () {
   return csvJunctionData.map((data) => {
     return new Junction({
       uuid: data.uuid,
-      name: data.junction_name,
+      name: data.name,
       latitude: parseFloat(data.latitude),
       longitude: parseFloat(data.longitude)
     })

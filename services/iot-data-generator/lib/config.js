@@ -1,7 +1,5 @@
 'use strict'
 
-'use strict'
-
 const { get } = require('env-var')
 
 const SUPPORTED_TRANSPORTS = {

@@ -2,8 +2,8 @@
 
 ## What it does
 
-* Seeds the backing IoT MongoDB instance with data.
-* Simulates the IoT sensor network for the lab.
+Simulates the IoT sensor network for the lab. Each sensor will occasionally
+send out a JSON payload with containing its state.
 
 ## Simulation Specifics
 
