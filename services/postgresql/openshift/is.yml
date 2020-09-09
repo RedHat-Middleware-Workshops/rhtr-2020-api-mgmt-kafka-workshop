@@ -1,0 +1,22 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  labels:
+    app: iot-psql
+    app.kubernetes.io/component: iot-psql
+    app.kubernetes.io/instance: iot-psql
+  name: iot-psql
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
+      openshift.io/imported-from: quay.io/evanshortiss/rhtr-2020-pgsql
+    from:
+      kind: DockerImage
+      name: quay.io/evanshortiss/rhtr-2020-pgsql
+    importPolicy: {}
+    name: latest
+    referencePolicy:
+      type: Source

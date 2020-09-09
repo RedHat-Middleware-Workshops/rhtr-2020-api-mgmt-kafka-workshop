@@ -1,0 +1,72 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftWebConsole
+  name: iot-psql
+  labels:
+    app: iot-psql
+    app.kubernetes.io/component: iot-psql
+    app.kubernetes.io/instance: iot-psql
+spec:
+  strategy:
+    type: Rolling
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 600
+      maxUnavailable: 25%
+      maxSurge: 25%
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - iot-psql
+        from:
+          kind: ImageStreamTag
+          name: 'iot-psql:latest'
+    - type: ConfigChange
+  replicas: 1
+  revisionHistoryLimit: 10
+  test: false
+  selector:
+    app: iot-psql
+    deploymentconfig: iot-psql
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: iot-psql
+        deploymentconfig: iot-psql
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+    spec:
+      volumes:
+        - name: postgresql-data
+          persistentVolumeClaim:
+            claimName: iot-psql-data
+      containers:
+        - resources: {}
+          terminationMessagePath: /dev/termination-log
+          name: iot-psql
+          env:
+            - name: PGDATA
+              value: /data/data
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: postgresql-data
+              mountPath: /data
+          terminationMessagePolicy: File
+          image: >-
+            quay.io/evanshortiss/rhtr-2020-pgsql@sha256:3c305345f9baea89880cec0f6e7ab12d8640d6946a05fc84e45809c988272a90
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
