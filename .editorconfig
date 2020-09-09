@@ -1,7 +1,7 @@
 # Tells the .editorconfg plugin to stop searching once it finds this file
 root = true
 
-[*.{js,ts,tsx,md,css}]
+[*.{js,ts,tsx,md,css,yml}]
 indent_size = 2
 indent_style = space
 charset = utf-8
