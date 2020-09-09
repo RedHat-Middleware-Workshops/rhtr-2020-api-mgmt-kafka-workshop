@@ -35,6 +35,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Login to the quay.io registry
+      run: echo "${{ secrets.QUAY_RHTR_2020_IOT_PASSWORD }}" | docker login quay.io -u ${{ secrets.QUAY_RHTR_2020_IOT_USERNAME }} --password-stdin
+
     - name: Build Docker image
       run: docker build . -t quay.io/evanshortiss/rhtr-2020-iot-datagen
 
