@@ -1,0 +1,42 @@
+name: IoT Data Generator CI
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ master ]
+    paths:
+      - 'services/iot-data-generator/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'services/iot-data-generator/**'
+defaults:
+  run:
+    working-directory: 'services/iot-data-generator/'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install
+    - run: npm test
+  build:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build Docker image
+      run: docker build . -t quay.io/evanshortiss/rhtr-2020-iot-datagen
+
+    - name: Push Docker image
+      run: docker push quay.io/evanshortiss/rhtr-2020-iot-datagen

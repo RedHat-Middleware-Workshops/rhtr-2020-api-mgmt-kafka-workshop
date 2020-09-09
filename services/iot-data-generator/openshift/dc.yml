@@ -1,0 +1,88 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftWebConsole
+  labels:
+    app: iot-data-generator
+    app.kubernetes.io/component: iot-data-generator
+    app.kubernetes.io/instance: iot-data-generator
+    app.kubernetes.io/part-of: iot-data-generator
+    app.openshift.io/runtime: nodejs
+  name: iot-data-generator
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    app: iot-data-generator
+    deploymentconfig: iot-data-generator
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: iot-data-generator
+        deploymentconfig: iot-data-generator
+    spec:
+      containers:
+      - image: quay.io/evanshortiss/rhtr-2020-iot-datagen@sha256:8c41139447adffbf4a06e278e2d88857eab798eebfcfd0853a90e435841bd365
+        imagePullPolicy: IfNotPresent
+        name: iot-data-generator
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+  test: false
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - iot-data-generator
+      from:
+        kind: ImageStreamTag
+        name: iot-data-generator:latest
+      lastTriggeredImage: quay.io/evanshortiss/rhtr-2020-iot-datagen@sha256:8c41139447adffbf4a06e278e2d88857eab798eebfcfd0853a90e435841bd365
+    type: ImageChange
+  - type: ConfigChange
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2020-09-09T13:22:09Z"
+    lastUpdateTime: "2020-09-09T13:22:09Z"
+    message: Deployment config has minimum availability.
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2020-09-09T13:22:10Z"
+    lastUpdateTime: "2020-09-09T13:22:10Z"
+    message: replication controller "iot-data-generator-1" successfully rolled out
+    reason: NewReplicationControllerAvailable
+    status: "True"
+    type: Progressing
+  details:
+    causes:
+    - type: ConfigChange
+    message: config change
+  latestVersion: 1
+  observedGeneration: 2
+  readyReplicas: 1
+  replicas: 1
+  unavailableReplicas: 0
+  updatedReplicas: 1

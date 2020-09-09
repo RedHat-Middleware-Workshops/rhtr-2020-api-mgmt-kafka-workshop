@@ -1,0 +1,27 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/image.dockerRepositoryCheck: "2020-09-09T13:21:54Z"
+  generation: 2
+  labels:
+    app: iot-data-generator
+    app.kubernetes.io/component: iot-data-generator
+    app.kubernetes.io/instance: iot-data-generator
+    app.kubernetes.io/part-of: iot-data-generator
+  name: iot-data-generator
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
+      openshift.io/imported-from: quay.io/evanshortiss/rhtr-2020-iot-datagen
+    from:
+      kind: DockerImage
+      name: quay.io/evanshortiss/rhtr-2020-iot-datagen
+    generation: 2
+    importPolicy: {}
+    name: latest
+    referencePolicy:
+      type: Source

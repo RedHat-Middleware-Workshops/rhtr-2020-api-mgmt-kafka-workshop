@@ -57,13 +57,13 @@ npm run nodeshift
 The npm registry variables passed in the example are optional.
 
 ```bash
-export TAGNAME=rhtr-2020-kafka-amp-iot-datagen
+export TAGNAME=rhtr-2020-iot-datagen
 
 # Note: the --build-arg flags are only required if using a custom npm registry
 docker build \
 --build-arg NPM_REGISTRY_URL=$REG_URL \
 --build-arg NPM_CAFILE_URL=$REG_CA_URL \
-. -t rhtr-2020-kafka-amp-iot-datagen
+. -t quay.io/evanshortiss/rhtr-2020-iot-datagen
 
-docker run rhtr-2020-kafka-amp-iot-datagen:latest
+docker run quay.io/evanshortiss/rhtr-2020-iot-datagen
 ```
