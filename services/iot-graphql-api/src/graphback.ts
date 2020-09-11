@@ -8,7 +8,7 @@ import { connectDB, loadDBConfig } from './db'
 /**
  * create Apollo server using automatically generated resolvers
  */
-export const createApolloServer = () => {
+export const createApolloServer = async () => {
   const graphbackExtension = 'graphback'
   const config = loadConfigSync({
     extensions: [
@@ -35,11 +35,10 @@ export const createApolloServer = () => {
   })
 
   const dbConfig = loadDBConfig()
-  migrateDB(dbConfig, typeDefs, {
+  await migrateDB(dbConfig, typeDefs, {
     operationFilter: removeNonSafeOperationsFilter
-  }).then(() => {
-    console.log('Migrated database')
   })
+  console.log('Migrated database')
 
   const apolloServer = new ApolloServer({
     typeDefs,
@@ -47,6 +46,5 @@ export const createApolloServer = () => {
     context: contextCreator
   })
 
-  return apolloServer;
+  return apolloServer
 }
-

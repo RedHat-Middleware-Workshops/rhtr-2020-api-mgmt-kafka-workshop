@@ -1,4 +1,5 @@
 import Knex from 'knex'
+import config from './config'
 
 export function loadDBConfig() {
   let port
@@ -6,12 +7,12 @@ export function loadDBConfig() {
     port = parseInt(process.env.DB_PORT, 10)
   }
   return {
-    client: process.env.DB_CLIENT,
+    client: config.DB_CLIENT,
     connection: {
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-      host: process.env.DB_HOST,
+      user: config.DB_USER,
+      password: config.DB_PASSWORD,
+      database: config.DB_DATABASE,
+      host: config.DB_HOST,
       port: port && !isNaN(port) ? port : 5432
     },
     pool: { min: 5, max: 30 }

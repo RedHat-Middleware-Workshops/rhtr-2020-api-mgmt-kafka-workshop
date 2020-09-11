@@ -1,3 +1,4 @@
+import { ApolloServer } from 'apollo-server-express'
 import cors from 'cors'
 import express from 'express'
 import http from 'http'
@@ -17,12 +18,19 @@ app.use((req: Express.Request, res: Express.Response, next) => {
   }
 })
 
-const apolloServer = createApolloServer();
-apolloServer.applyMiddleware({ app })
+createApolloServer()
+  .then((apolloServer: ApolloServer) => {
+    apolloServer.applyMiddleware({ app })
 
-const httpServer = http.createServer(app)
-apolloServer.installSubscriptionHandlers(httpServer)
+    const httpServer = http.createServer(app)
+    apolloServer.installSubscriptionHandlers(httpServer)
 
-httpServer.listen({ port: HTTP_PORT }, () => {
-  console.log(`🚀  Graphback Server ready at http://localhost:${HTTP_PORT}/graphql \nFor more information see: https://graphback.dev`)
-})
+    httpServer.listen({ port: HTTP_PORT }, () => {
+      console.log(
+        `🚀  Graphback Server ready at http://localhost:${HTTP_PORT}/graphql \nFor more information see: https://graphback.dev`
+      )
+    })
+  })
+  .catch((error) => {
+    console.log(`Error: ${error}`)
+  })
