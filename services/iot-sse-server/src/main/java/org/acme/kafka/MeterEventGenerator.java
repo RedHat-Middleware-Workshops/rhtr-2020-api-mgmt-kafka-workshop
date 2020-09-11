@@ -1,5 +1,5 @@
 package org.acme.kafka;
-
+import io.quarkus.arc.profile.IfBuildProfile;
 import org.jboss.logging.Logger;
 
 import java.time.Duration;
@@ -16,6 +16,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * disabled using the GENERATOR_METERS_ENABLED environment variable
  */
 @ApplicationScoped
+@IfBuildProfile("dev")
 public class MeterEventGenerator {
 
     @ConfigProperty(name = "generators.meters.enabled", defaultValue = "false") 

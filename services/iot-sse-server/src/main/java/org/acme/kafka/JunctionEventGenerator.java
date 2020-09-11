@@ -1,7 +1,7 @@
 package org.acme.kafka;
 
 import org.jboss.logging.Logger;
-
+import io.quarkus.arc.profile.IfBuildProfile;
 import java.time.Duration;
 import java.util.Random;
 
@@ -17,6 +17,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * disabled using the GENERATOR_METERS_ENABLED environment variable
  */
 @ApplicationScoped
+@IfBuildProfile("dev")
 public class JunctionEventGenerator {
 
     @ConfigProperty(name = "generators.junctions.enabled", defaultValue = "false") 
