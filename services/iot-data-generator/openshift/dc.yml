@@ -36,7 +36,7 @@ spec:
         deploymentconfig: iot-data-generator
     spec:
       containers:
-      - image: quay.io/evanshortiss/rhtr-2020-iot-datagen@sha256:8c41139447adffbf4a06e278e2d88857eab798eebfcfd0853a90e435841bd365
+      - image: quay.io/evanshortiss/rhtr-2020-iot-datagen
         imagePullPolicy: IfNotPresent
         name: iot-data-generator
         ports:
@@ -62,27 +62,3 @@ spec:
       lastTriggeredImage: quay.io/evanshortiss/rhtr-2020-iot-datagen@sha256:8c41139447adffbf4a06e278e2d88857eab798eebfcfd0853a90e435841bd365
     type: ImageChange
   - type: ConfigChange
-status:
-  availableReplicas: 1
-  conditions:
-  - lastTransitionTime: "2020-09-09T13:22:09Z"
-    lastUpdateTime: "2020-09-09T13:22:09Z"
-    message: Deployment config has minimum availability.
-    status: "True"
-    type: Available
-  - lastTransitionTime: "2020-09-09T13:22:10Z"
-    lastUpdateTime: "2020-09-09T13:22:10Z"
-    message: replication controller "iot-data-generator-1" successfully rolled out
-    reason: NewReplicationControllerAvailable
-    status: "True"
-    type: Progressing
-  details:
-    causes:
-    - type: ConfigChange
-    message: config change
-  latestVersion: 1
-  observedGeneration: 2
-  readyReplicas: 1
-  replicas: 1
-  unavailableReplicas: 0
-  updatedReplicas: 1
