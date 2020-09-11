@@ -10,7 +10,7 @@ The following is a list of the services deployed during the lab, and the
 host/port combination that they're available on if deployed locally using
 Docker.
 
-* MongoDB (http://localhost:27017)
+* PostgreSQL (localhost:5432)
 * IoT Data Generator (http://localhost:8082)
 * IoT Devices GraphQL API (http://localhost:8081)
 * IoT Devices Management Portal (http://localhost:8080)
@@ -22,7 +22,7 @@ The [IoT Devices GraphQL API](http://localhost:8081/graphql) exposes a GraphQL
 API and the GraphQL Playground to experiment with queries.
 
 The [Iot Data Generator](http://localhost:8082) simulates the IoT devices, and
-MongoDB stores IoT device data. The Iot Data Generator is also responsible for
+PostgreSQL stores IoT device data. The Iot Data Generator is also responsible for
 seeding the initial data into the database.
 
 
@@ -31,26 +31,8 @@ seeding the initial data into the database.
 *NOTE: Testing and development was performed using Docker Community v19. YMMV with different versions.*
 
 ```bash
-git clone git@github.com:evanshortiss/rhtr-2020-api-mgmt-kafka.git rhtr-2020-lab
-
-cd rhtr-2020-lab/services
-
-# Create a network
-docker network create rhtr-lab
-
-# Build, run, and configure MongoDB
-docker build ./mongodb -t rhtr-mongodb
-docker run -d --network rhtr-lab -p 27017:27017 --name city-mongodb rhtr-mongodb
-docker exec -it city-mongodb /bin/bash
-mongo -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD localhost:27017/admin --eval "rs.initiate({ _id: 'rs0', members: [ { _id: 0, host: 'localhost:27017' } ] });"
-```
-
-Type `exit` to exit the `mongo` process, and type `exit` again to leave the
-container. Next start the services:
-
-```bash
-# Pass any non-empty string for GOOGLE_MAPS_API_KEY if you don't have a key, but
-# note that the maps feature in the UI will display an error
+# Passing GOOGLE_MAPS_API_KEY is optional. If you don't pass a valid key
+# the sensor management UI will not display a map, but is otherwise OK
 docker-compose build --build-arg GOOGLE_MAPS_API_KEY=<an-api-key>
 docker-compose up -d
 ```
@@ -91,7 +73,7 @@ or during the lab:
 
 * Lab attendees will deploy this based on a template repository using Che.
 
-### MongoDB (pre-deploy)
+### PostgreSQL (pre-deploy)
 
 * Shared database used to store:
   * In service parking meters (collection name: `meters`)
@@ -107,7 +89,7 @@ Uses [Graphback](https://graphback.dev/) to auto generate GraphQL resolvers for
 * Developed during the lab using Che:
   * Start with a template repository/
   * Deploy and test with a default data model to learn about Graphback and GraphQL.
-  * Update the `datamodel.graphql` file to match the MongoDB collection schema.
+  * Update the `datamodel.graphql` file to match the PostgreSQL table schema.
   * Redeploy using `nodeshift` CLI and verify correct data can be retrieved via the GraphQL endpoint.
 * Alternatively, deploy this with Ansible and a valid `datamodel.graphql` file to save time.
 
@@ -129,7 +111,7 @@ after deploying that service:
 
 ### Camel Data Ingestion (lab-service)
 
-* ETL data from Kafka topics to MongoDB `events` collection.
+* ETL data from Kafka topics to PostgreSQL `events` table.
 * Attendees can use Che to configure and deploy the Camel routes.
 * Alternatively, can be pre-deployed using Ansible.
 
