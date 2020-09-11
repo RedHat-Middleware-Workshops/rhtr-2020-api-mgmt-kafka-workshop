@@ -26,11 +26,7 @@ export const createApolloServer = () => {
 
   const { typeDefs, resolvers, contextCreator } = buildGraphbackAPI(modelDefs, {
     crud: {
-      create: true,
-      update: true,
-      find: true,
-      findOne: true,
-      delete: true,
+      create: false,
       subCreate: false,
       subUpdate: false,
       subDelete: false
