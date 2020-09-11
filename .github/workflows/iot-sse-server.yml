@@ -1,0 +1,40 @@
+name: IoT SSE Server CI
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ master ]
+    paths:
+      - 'services/iot-sse-server/**'
+      - '.github/workflows/iot-sse-server.yml'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'services/iot-sse-server/**'
+      - '.github/workflows/iot-sse-server.yml'
+defaults:
+  run:
+    working-directory: 'services/iot-sse-server/'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Maven Build
+      run: mvn package -Pnative -Dquarkus.native.container-build=true
+
+    - name: Login to the quay.io registry
+      run: echo "${{ secrets.QUAY_RHTR_2020_IOT_PASSWORD }}" | docker login quay.io -u ${{ secrets.QUAY_RHTR_2020_IOT_USERNAME }} --password-stdin
+
+
+    - name: Build Docker image
+      run: docker build -f src/main/docker/Dockerfile.native -t quay.io/evanshortiss/rhtr-2020-quarkus-sse .
+
+    - name: Push Docker image
+      run: docker push quay.io/evanshortiss/rhtr-2020-quarkus-sse
