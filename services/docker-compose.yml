@@ -1,6 +1,7 @@
 version: '3'
 services:
   zookeeper:
+    container_name: iot-lab-zookeeper
     networks:
       - rhtr-lab
     image: strimzi/kafka:0.11.3-kafka-2.1.0
@@ -13,6 +14,7 @@ services:
     environment:
       LOG_DIR: /tmp/logs
   kafka:
+    container_name: iot-lab-kafka
     networks:
       - rhtr-lab
     image: strimzi/kafka:0.11.3-kafka-2.1.0
@@ -38,6 +40,18 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5432:5432"
+  iot-sse-server:
+    networks:
+      - rhtr-lab
+    container_name: iot-sse-server
+    build:
+      context: iot-sse-server/
+      dockerfile: src/main/docker/Dockerfile.jvm
+    ports:
+      - "8083:8083"
+    environment:
+      - HTTP_PORT=8082
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
   iot-data-generator:
     networks:
       - rhtr-lab
