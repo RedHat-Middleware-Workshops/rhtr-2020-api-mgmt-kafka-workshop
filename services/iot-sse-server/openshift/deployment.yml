@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftWebConsole
+  creationTimestamp: "2020-09-11T12:02:35Z"
+  labels:
+    app: iot-sse-server
+    app.kubernetes.io/component: iot-sse-server
+    app.kubernetes.io/instance: iot-sse-server
+    app.kubernetes.io/part-of: iot-sse-server
+  name: iot-sse-server
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: iot-sse-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: iot-sse-server
+        deploymentconfig: iot-sse-server
+    spec:
+      containers:
+      - image: quay.io/evanshortiss/rhtr-2020-quarkus-sse
+        imagePullPolicy: Always
+        name: iot-sse-server
+        ports:
+        - containerPort: 8081
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

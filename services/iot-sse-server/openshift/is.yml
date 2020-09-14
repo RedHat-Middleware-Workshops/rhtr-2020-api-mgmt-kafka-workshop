@@ -1,0 +1,28 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/image.dockerRepositoryCheck: "2020-09-11T12:02:35Z"
+  creationTimestamp: "2020-09-11T12:02:34Z"
+  generation: 2
+  labels:
+    app: iot-sse-server
+    app.kubernetes.io/component: iot-sse-server
+    app.kubernetes.io/instance: iot-sse-server
+    app.kubernetes.io/part-of: iot-sse-server
+  name: iot-sse-server
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
+      openshift.io/imported-from: quay.io/evanshortiss/rhtr-2020-quarkus-sse
+    from:
+      kind: DockerImage
+      name: quay.io/evanshortiss/rhtr-2020-quarkus-sse
+    generation: 2
+    importPolicy: {}
+    name: latest
+    referencePolicy:
+      type: Source
