@@ -14,7 +14,6 @@ metadata:
     app.openshift.io/runtime-version: latest
   name: iot-sse-server
 spec:
-  clusterIP: 172.30.115.188
   ports:
   - name: 8081-tcp
     port: 8081
