@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mobile-app
+  labels:
+    app: mobile-app
+spec:
+  ports:
+  - name: 8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: 8443-tcp
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app: mobile-app
+    deploymentconfig: mobile-app
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

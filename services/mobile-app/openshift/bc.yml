@@ -1,0 +1,42 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: mobile-app
+  name: mobile-app
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: mobile-app:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    contextDir: services/mobile-app
+    git:
+      uri: https://github.com/RedHat-Middleware-Workshops/rhtr-2020-api-mgmt-kafka-workshop
+    type: Git
+  strategy:
+    sourceStrategy:
+      env:
+      - name: BUILD_OUTPUT_DIR
+        value: build
+      from:
+        kind: ImageStreamTag
+        name: s2i-nodejs-nginx:latest
+    type: Source
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - github:
+      secret: B-0fIj5zdGiG823tIF9d
+    type: GitHub
+  - generic:
+      secret: jCHoF5sy2e1vE-Y36tif
+    type: Generic
+  - type: ConfigChange
+  - imageChange:
+      lastTriggeredImageID: quay.io/evanshortiss/s2i-nodejs-nginx@sha256:3022afab7cbb753148fc2d3f4ef271eb267356b42c9f674f64273047f121c4a7
+    type: ImageChange

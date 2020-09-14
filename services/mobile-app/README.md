@@ -24,7 +24,7 @@ npm start
 
 ## Configuration
 
-Build-time environment variables are supported:
+Build-time environment variables:
 
 * REACT_APP_SSE_HOSTNAME
   * Defaults to http://localhost:8080 during development.
@@ -35,17 +35,17 @@ Build-time environment variables are supported:
 ### Apply YAML
 
 ```
-oc apply -f openshift/
+oc apply -f services/mobile-app/openshift/
 ```
 
 ### Source-to-Image
 
 ```
-export REPO_URL=https://github.com/RedHat-Middleware-Workshops/rhtr-2020-api-mgmt-kafka
+export REPO_URL=https://github.com/RedHat-Middleware-Workshops/rhtr-2020-api-mgmt-kafka-workshop
 
 oc new-app quay.io/evanshortiss/s2i-nodejs-nginx~$REPO_URL \
+--name='mobile-app' --build-env BUILD_OUTPUT_DIR=build \
 --context-dir='services/mobile-app'
---env BUILD_OUTPUT_DIR=build
 ```
 
 ## Credits
