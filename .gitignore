@@ -9,3 +9,4 @@ Thumbs.db
 *.log
 .vscode
 .idea
+project.yml
