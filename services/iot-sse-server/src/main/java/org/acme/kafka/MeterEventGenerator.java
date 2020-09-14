@@ -4,6 +4,12 @@ import org.jboss.logging.Logger;
 
 import java.time.Duration;
 import java.util.Random;
+import java.util.Date;
+import java.util.List;
+import java.util.Arrays;
+import java.util.TimeZone;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -23,7 +29,7 @@ public class MeterEventGenerator {
     private String enabled;
 
     private static final Logger LOG = Logger.getLogger(MeterEventGenerator.class);
-
+    private List<String> statusTypes = Arrays.asList("occupied", "available", "out-of-service", "unknown");
     private Random random = new Random();
 
     @Outgoing("generated-meter-events")
@@ -37,11 +43,17 @@ public class MeterEventGenerator {
                     }
 
                     LOG.info("writing generated message to topic");
+                    
+                    TimeZone tz = TimeZone.getTimeZone("UTC");
+                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                    df.setTimeZone(tz);
+                    String currentIsoTime = df.format(new Date());
 
                     MeterEvent m = new MeterEvent(
                         "Generated Meter",
-                        "generated-uuid",
-                        "generated-status(" +random.nextInt() + ")"
+                        "generated-uuid(" +random.nextInt() + ")",
+                        statusTypes.get(random.nextInt(statusTypes.size())),
+                        df.format(new Date())
                     );
 
                     return m.toJSON();
