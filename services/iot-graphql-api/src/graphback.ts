@@ -25,12 +25,6 @@ export const createApolloServer = async () => {
   const db = connectDB()
 
   const { typeDefs, resolvers, contextCreator } = buildGraphbackAPI(modelDefs, {
-    crud: {
-      create: false,
-      subCreate: false,
-      subUpdate: false,
-      subDelete: false
-    },
     dataProviderCreator: createKnexDbProvider(db)
   })
 

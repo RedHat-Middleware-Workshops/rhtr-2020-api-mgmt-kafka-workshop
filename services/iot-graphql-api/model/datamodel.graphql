@@ -5,7 +5,7 @@ type Junction {
   """
   @id
   """
-  uuid: ID!
+  id: String!
   name: String!
   latitude: String!
   longitude: String!
@@ -18,7 +18,7 @@ type Meter {
   """
   @id
   """
-  uuid: ID!
+  id: String!
   address: String!
   latitude: String!
   longitude: String!

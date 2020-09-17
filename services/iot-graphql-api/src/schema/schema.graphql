@@ -7,40 +7,30 @@ directive @specifiedBy(
 ) on SCALAR
 
 input CreateJunctionInput {
-  uuid: ID
+  id: String
   name: String!
   latitude: String!
   longitude: String!
 }
 
 input CreateMeterInput {
-  uuid: ID
+  id: String
   address: String!
   latitude: String!
   longitude: String!
 }
 
-input IDInput {
-  ne: ID
-  eq: ID
-  le: ID
-  lt: ID
-  ge: ID
-  gt: ID
-  in: [ID!]
-}
-
 """@model"""
 type Junction {
   """@id"""
-  uuid: ID!
+  id: String!
   name: String!
   latitude: String!
   longitude: String!
 }
 
 input JunctionFilter {
-  uuid: IDInput
+  id: StringInput
   name: StringInput
   latitude: StringInput
   longitude: StringInput
@@ -60,7 +50,7 @@ input JunctionSubscriptionFilter {
   and: [JunctionSubscriptionFilter!]
   or: [JunctionSubscriptionFilter!]
   not: JunctionSubscriptionFilter
-  uuid: IDInput
+  id: StringInput
   name: StringInput
   latitude: StringInput
   longitude: StringInput
@@ -69,14 +59,14 @@ input JunctionSubscriptionFilter {
 """@model"""
 type Meter {
   """@id"""
-  uuid: ID!
+  id: String!
   address: String!
   latitude: String!
   longitude: String!
 }
 
 input MeterFilter {
-  uuid: IDInput
+  id: StringInput
   address: StringInput
   latitude: StringInput
   longitude: StringInput
@@ -96,21 +86,21 @@ input MeterSubscriptionFilter {
   and: [MeterSubscriptionFilter!]
   or: [MeterSubscriptionFilter!]
   not: MeterSubscriptionFilter
-  uuid: IDInput
+  id: StringInput
   address: StringInput
   latitude: StringInput
   longitude: StringInput
 }
 
 input MutateJunctionInput {
-  uuid: ID!
+  id: String!
   name: String
   latitude: String
   longitude: String
 }
 
 input MutateMeterInput {
-  uuid: ID!
+  id: String!
   address: String
   latitude: String
   longitude: String
@@ -136,9 +126,9 @@ input PageRequest {
 }
 
 type Query {
-  getJunction(id: ID!): Junction
+  getJunction(id: String!): Junction
   findJunctions(filter: JunctionFilter, page: PageRequest, orderBy: OrderByInput): JunctionResultList!
-  getMeter(id: ID!): Meter
+  getMeter(id: String!): Meter
   findMeters(filter: MeterFilter, page: PageRequest, orderBy: OrderByInput): MeterResultList!
 }
 

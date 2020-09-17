@@ -1,11 +1,9 @@
 version: '3'
-
 services:
-  postgres:
-    image: postgres:9.6
+  iot-psql:
+    container_name: iot-lab-psql
+    build:
+      context: ../postgresql/
+      dockerfile: Dockerfile
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: rhtr-pass
-      POSTGRES_USER: rhtr-user
-      POSTGRES_DB: city-info

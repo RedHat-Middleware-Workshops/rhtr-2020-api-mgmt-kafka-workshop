@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "codegen": "graphback generate && graphql codegen",
-    "dev": "ts-node src/index.ts",
+    "dev": "ts-node -r dotenv/config src/index.ts",
     "format": "prettier --write --no-semi --trailing-comma=none --single-quote src/**/*.ts",
     "lint": "prettier --check --no-semi --trailing-comma=none --single-quote src/**/*.ts",
     "start": "node -r dotenv/config dist/index.js",
