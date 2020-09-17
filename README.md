@@ -11,6 +11,6 @@ Refer to the [services README](/services).
 ./scripts/generate-project.sh
 
 # Create a project namespace and apply the project.yml resources
-oc new-project city-of-la
+oc new-project city-of-losangeles
 oc apply -f project.yml
 ```
