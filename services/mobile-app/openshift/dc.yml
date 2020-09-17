@@ -3,6 +3,7 @@ kind: DeploymentConfig
 metadata:
   labels:
     app: mobile-app
+    app.openshift.io/runtime: nginx
   name: mobile-app
 spec:
   replicas: 1
