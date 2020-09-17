@@ -1,0 +1,11 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  labels:
+    app: sensor-management-ui
+    app.kubernetes.io/component: sensor-management-ui
+    app.kubernetes.io/instance: sensor-management-ui
+  name: sensor-management-ui
+spec:
+  lookupPolicy:
+    local: false
