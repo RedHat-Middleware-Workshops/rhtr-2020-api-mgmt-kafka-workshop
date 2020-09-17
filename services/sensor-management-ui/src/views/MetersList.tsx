@@ -104,10 +104,10 @@ const MetersListView: React.FC<MeterListViewProps> = (props) => {
     // const paging =
     const rows = data?.findMeters.items.map((m, idx) => {
       return (
-        <tr className="hover:bg-gray-200 fade-in" key={m?.uuid}>
+        <tr className="hover:bg-gray-200 fade-in" key={m?.id}>
           <td className="border px-4 py-2">
-            <Link className="underline text-blue-700" to={`/meters/${m?.uuid}`}>
-              {m?.uuid}
+            <Link className="underline text-blue-700" to={`/meters/${m?.id}`}>
+              {m?.id}
             </Link>
           </td>
           <td className="border px-4 py-2">{m?.address}</td>

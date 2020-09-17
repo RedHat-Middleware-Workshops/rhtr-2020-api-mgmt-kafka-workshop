@@ -25,11 +25,11 @@ const JunctionsListView: React.FC<{ history: History }> = ({ history }) => {
   const rows = data?.findJunctions.items.map((j) => {
     return (
       <tr
-        onClick={() => history.push(`/meters/${j?.uuid}`)}
+        onClick={() => history.push(`/meters/${j?.id}`)}
         className="cursor-pointer hover:bg-gray-200 fade-in"
-        key={j?.uuid}
+        key={j?.id}
       >
-        <td className="border px-4 py-2">{j?.uuid}</td>
+        <td className="border px-4 py-2">{j?.id}</td>
         <td className="border px-4 py-2">{j?.name}</td>
         <td className="border px-4 py-2">
           {j?.latitude},{j?.longitude}

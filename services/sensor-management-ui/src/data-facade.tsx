@@ -14,28 +14,18 @@ export type Scalars = {
   Float: number;
 };
 
-export type IdInput = {
-  ne?: Maybe<Scalars['ID']>;
-  eq?: Maybe<Scalars['ID']>;
-  le?: Maybe<Scalars['ID']>;
-  lt?: Maybe<Scalars['ID']>;
-  ge?: Maybe<Scalars['ID']>;
-  gt?: Maybe<Scalars['ID']>;
-  in?: Maybe<Array<Scalars['ID']>>;
-};
-
 /** @model */
 export type Junction = {
   __typename?: 'Junction';
   /** @id */
-  uuid: Scalars['ID'];
+  id: Scalars['String'];
   name: Scalars['String'];
   latitude: Scalars['String'];
   longitude: Scalars['String'];
 };
 
 export type JunctionFilter = {
-  uuid?: Maybe<IdInput>;
+  id?: Maybe<StringInput>;
   name?: Maybe<StringInput>;
   latitude?: Maybe<StringInput>;
   longitude?: Maybe<StringInput>;
@@ -56,14 +46,14 @@ export type JunctionResultList = {
 export type Meter = {
   __typename?: 'Meter';
   /** @id */
-  uuid: Scalars['ID'];
+  id: Scalars['String'];
   address: Scalars['String'];
   latitude: Scalars['String'];
   longitude: Scalars['String'];
 };
 
 export type MeterFilter = {
-  uuid?: Maybe<IdInput>;
+  id?: Maybe<StringInput>;
   address?: Maybe<StringInput>;
   latitude?: Maybe<StringInput>;
   longitude?: Maybe<StringInput>;
@@ -100,7 +90,7 @@ export type Query = {
 
 
 export type QueryGetJunctionArgs = {
-  id: Scalars['ID'];
+  id: Scalars['String'];
 };
 
 
@@ -112,7 +102,7 @@ export type QueryFindJunctionsArgs = {
 
 
 export type QueryGetMeterArgs = {
-  id: Scalars['ID'];
+  id: Scalars['String'];
 };
 
 
@@ -142,22 +132,22 @@ export type StringInput = {
 
 export type JunctionFieldsFragment = (
   { __typename?: 'Junction' }
-  & Pick<Junction, 'uuid' | 'name' | 'latitude' | 'longitude'>
+  & Pick<Junction, 'id' | 'name' | 'latitude' | 'longitude'>
 );
 
 export type JunctionExpandedFieldsFragment = (
   { __typename?: 'Junction' }
-  & Pick<Junction, 'uuid' | 'name' | 'latitude' | 'longitude'>
+  & Pick<Junction, 'id' | 'name' | 'latitude' | 'longitude'>
 );
 
 export type MeterFieldsFragment = (
   { __typename?: 'Meter' }
-  & Pick<Meter, 'uuid' | 'address' | 'latitude' | 'longitude'>
+  & Pick<Meter, 'id' | 'address' | 'latitude' | 'longitude'>
 );
 
 export type MeterExpandedFieldsFragment = (
   { __typename?: 'Meter' }
-  & Pick<Meter, 'uuid' | 'address' | 'latitude' | 'longitude'>
+  & Pick<Meter, 'id' | 'address' | 'latitude' | 'longitude'>
 );
 
 export type FindJunctionsQueryVariables = Exact<{
@@ -180,7 +170,7 @@ export type FindJunctionsQuery = (
 );
 
 export type GetJunctionQueryVariables = Exact<{
-  id: Scalars['ID'];
+  id: Scalars['String'];
 }>;
 
 
@@ -212,7 +202,7 @@ export type FindMetersQuery = (
 );
 
 export type GetMeterQueryVariables = Exact<{
-  id: Scalars['ID'];
+  id: Scalars['String'];
 }>;
 
 
@@ -226,7 +216,7 @@ export type GetMeterQuery = (
 
 export const JunctionFieldsFragmentDoc = gql`
     fragment JunctionFields on Junction {
-  uuid
+  id
   name
   latitude
   longitude
@@ -234,7 +224,7 @@ export const JunctionFieldsFragmentDoc = gql`
     `;
 export const JunctionExpandedFieldsFragmentDoc = gql`
     fragment JunctionExpandedFields on Junction {
-  uuid
+  id
   name
   latitude
   longitude
@@ -242,7 +232,7 @@ export const JunctionExpandedFieldsFragmentDoc = gql`
     `;
 export const MeterFieldsFragmentDoc = gql`
     fragment MeterFields on Meter {
-  uuid
+  id
   address
   latitude
   longitude
@@ -250,7 +240,7 @@ export const MeterFieldsFragmentDoc = gql`
     `;
 export const MeterExpandedFieldsFragmentDoc = gql`
     fragment MeterExpandedFields on Meter {
-  uuid
+  id
   address
   latitude
   longitude
@@ -297,7 +287,7 @@ export type FindJunctionsQueryHookResult = ReturnType<typeof useFindJunctionsQue
 export type FindJunctionsLazyQueryHookResult = ReturnType<typeof useFindJunctionsLazyQuery>;
 export type FindJunctionsQueryResult = ApolloReactCommon.QueryResult<FindJunctionsQuery, FindJunctionsQueryVariables>;
 export const GetJunctionDocument = gql`
-    query getJunction($id: ID!) {
+    query getJunction($id: String!) {
   getJunction(id: $id) {
     ...JunctionExpandedFields
   }
@@ -370,7 +360,7 @@ export type FindMetersQueryHookResult = ReturnType<typeof useFindMetersQuery>;
 export type FindMetersLazyQueryHookResult = ReturnType<typeof useFindMetersLazyQuery>;
 export type FindMetersQueryResult = ApolloReactCommon.QueryResult<FindMetersQuery, FindMetersQueryVariables>;
 export const GetMeterDocument = gql`
-    query getMeter($id: ID!) {
+    query getMeter($id: String!) {
   getMeter(id: $id) {
     ...MeterExpandedFields
   }

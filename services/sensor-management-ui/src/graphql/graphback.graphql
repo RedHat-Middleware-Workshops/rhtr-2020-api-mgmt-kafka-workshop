@@ -1,5 +1,5 @@
 fragment JunctionFields on Junction {
-   uuid
+   id
    name
    latitude
    longitude
@@ -7,7 +7,7 @@ fragment JunctionFields on Junction {
 } 
 
 fragment JunctionExpandedFields on Junction {
-   uuid
+   id
    name
    latitude
    longitude
@@ -15,7 +15,7 @@ fragment JunctionExpandedFields on Junction {
 } 
 
 fragment MeterFields on Meter {
-   uuid
+   id
    address
    latitude
    longitude
@@ -23,7 +23,7 @@ fragment MeterFields on Meter {
 } 
 
 fragment MeterExpandedFields on Meter {
-   uuid
+   id
    address
    latitude
    longitude
@@ -41,7 +41,7 @@ query findJunctions($filter: JunctionFilter, $page: PageRequest, $orderBy: Order
     }
   }
 
-query getJunction($id: ID!) {
+query getJunction($id: String!) {
     getJunction(id: $id) {
       ...JunctionExpandedFields
     }
@@ -58,7 +58,7 @@ query findMeters($filter: MeterFilter, $page: PageRequest, $orderBy: OrderByInpu
     }
   }
 
-query getMeter($id: ID!) {
+query getMeter($id: String!) {
     getMeter(id: $id) {
       ...MeterExpandedFields
     }

@@ -102,7 +102,7 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
           <br />
 
           <h3 className="text-xl text-gray-600">UUID</h3>
-          <p className="text-xl text-gray-900">{meter.uuid}</p>
+          <p className="text-xl text-gray-900">{meter.id}</p>
           <br />
 
           <h3 className="text-xl text-gray-600">
