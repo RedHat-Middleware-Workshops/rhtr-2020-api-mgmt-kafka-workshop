@@ -1,0 +1,12 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  generation: 1
+  labels:
+    app: iot-graphql-api
+    app.kubernetes.io/component: iot-graphql-api
+    app.kubernetes.io/instance: iot-graphql-api
+  name: iot-graphql-api
+spec:
+  lookupPolicy:
+    local: false

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: iot-graphql-api
+    app.kubernetes.io/component: iot-graphql-api
+    app.kubernetes.io/instance: iot-graphql-api
+  name: iot-graphql-api
+spec:
+  ports:
+  - name: 8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    deployment: iot-graphql-api
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

@@ -1,0 +1,19 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: iot-graphql-api
+    app.kubernetes.io/component: iot-graphql-api
+    app.kubernetes.io/instance: iot-graphql-api
+  name: iot-graphql-api
+spec:
+  port:
+    targetPort: 8080-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: iot-graphql-api
+    weight: 100
+  wildcardPolicy: None

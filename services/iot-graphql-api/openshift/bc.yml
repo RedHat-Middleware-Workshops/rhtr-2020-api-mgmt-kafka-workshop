@@ -1,0 +1,42 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: iot-graphql-api
+    app.kubernetes.io/component: iot-graphql-api
+    app.kubernetes.io/instance: iot-graphql-api
+  name: iot-graphql-api
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: iot-graphql-api:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    contextDir: services/iot-graphql-api
+    git:
+      uri: https://github.com/RedHat-Middleware-Workshops/rhtr-2020-api-mgmt-kafka-workshop
+    type: Git
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: nodejs:12
+        namespace: openshift
+    type: Source
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - github:
+      secret: H1sM5ow3ksddUthma4xD
+    type: GitHub
+  - generic:
+      secret: FvmRciZTtLegSfT0wpZW
+    type: Generic
+  - type: ConfigChange
+  - imageChange:
+      lastTriggeredImageID: image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:2bfd71b41a1591a1ea19513cb92e5c1f43d235bbdf15b114b8fddd5521e99482
+    type: ImageChange
