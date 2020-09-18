@@ -10,5 +10,5 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 quote_type = single
 
-[*.{py,sh}]
+[*.{py,sh,java}]
 indent_size = 4
