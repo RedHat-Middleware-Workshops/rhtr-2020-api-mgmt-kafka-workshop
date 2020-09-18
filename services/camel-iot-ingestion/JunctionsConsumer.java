@@ -17,7 +17,7 @@ public class JunctionsConsumer extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        log.info("About to start route: Kafka Server -> Log ");
+        log.info("About to start route: Kafka Server -> Junction Updates Table in PSQL");
     
         // Message format: { junctionId: "pSiSvQE4ID1Yp7Pfxwuc2", counts: { ns: 9, ew: 32 }, timestamp: 1600430992 }
         from("kafka:{{consumer.topic}}?brokers={{kafka.host}}:{{kafka.port}}"

@@ -17,7 +17,7 @@ public class MetersConsumer extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        log.info("About to start route: Kafka Server -> Log ");
+        log.info("About to start route: Kafka Server -> Meter Updates Table in PSQL");
     
         // Message format: {"meterId":"pSiSvQE4ID1Yp7Pfxwuc2","timestamp":1600430992,"status":"occupied"}
         from("kafka:{{consumer.topic}}?brokers={{kafka.host}}:{{kafka.port}}"
