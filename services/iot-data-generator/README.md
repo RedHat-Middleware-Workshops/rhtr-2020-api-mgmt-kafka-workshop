@@ -29,7 +29,6 @@ The default values for these variables can be found in *lib/config.js*.
 * `TRANSPORT_MODE`: Determines where IoT data is written to. Set to `kafka` or `console`.
 * `HTTP_PORT`: Port the HTTP server listens on.
 * `KAFKA_HOST`: Kafka broker(s) connection string.
-* `MONGO_CONNECTION_STRING`: Connection string for MongoDB.
 
 ## Run Locally with Node.js
 
