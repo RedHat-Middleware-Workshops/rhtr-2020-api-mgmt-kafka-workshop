@@ -7,7 +7,10 @@ const { KAFKA_HOST } = require('../config')
 module.exports = function getKafkaTransport () {
   return new Promise((resolve, reject) => {
     const kafkaHost = KAFKA_HOST
+    log('connecting to kafka host: ', kafkaHost)
     const client = new kafka.KafkaClient({
+      connectTimeout: 10000,
+      requestTimeout: 10000,
       kafkaHost
     })
     const producer = new kafka.Producer(client)
