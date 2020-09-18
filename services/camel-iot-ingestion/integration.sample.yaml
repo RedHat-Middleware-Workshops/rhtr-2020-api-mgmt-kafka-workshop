@@ -1,0 +1,18 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: example
+spec:
+  sources:
+  - content: |
+      import org.apache.camel.builder.RouteBuilder;
+
+      public class Example extends RouteBuilder {
+          @Override
+          public void configure() throws Exception {
+              from("timer:tick")
+                  .setBody(constant("Hello World!"))
+              .to("log:info?skipBodyLineSeparator=false");
+          }
+      }
+  name: Example.java
