@@ -1,9 +1,13 @@
 apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
+  annotations:
+    app.openshift.io/connects-to: iot-graphql-api
+    app.openshift.io/connects-to: iot-sse-server
   labels:
     app: mobile-app
     app.openshift.io/runtime: nginx
+    app.kubernetes.io/part-of: frontends
   name: mobile-app
 spec:
   replicas: 1

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
+    app.openshift.io/connects-to: iot-psql
     deployment.kubernetes.io/revision: "4"
     image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"iot-graphql-api:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"iot-graphql-api\")].image"}]'
   labels:

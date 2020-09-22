@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
+    app.openshift.io/connects-to: iot-graphql-api
     deployment.kubernetes.io/revision: "3"
     image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"sensor-management-ui:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"sensor-management-ui\")].image"}]'
   labels:
@@ -9,6 +10,7 @@ metadata:
     app.openshift.io/runtime: nginx
     app.kubernetes.io/component: sensor-management-ui
     app.kubernetes.io/instance: sensor-management-ui
+    app.kubernetes.io/part-of: frontends
   name: sensor-management-ui
 spec:
   progressDeadlineSeconds: 600
