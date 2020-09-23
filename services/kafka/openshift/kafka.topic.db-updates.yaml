@@ -1,0 +1,12 @@
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: city-info.updates.dbhistory
+  labels:
+    strimzi.io/cluster: iot-cluster
+spec:
+  partitions: 10
+  replicas: 1
+  config:
+    retention.ms: 604800000
+    segment.bytes: 1073741824

@@ -1,0 +1,15 @@
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaConnect
+metadata:
+  name: iot-connect-cluster
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 2.5.0
+  replicas: 1
+  bootstrapServers: 'iot-cluster-kafka-bootstrap:9093'
+  image: quay.io/evanshortiss/rhtr-2020-kafka-connect-pgsql:latest
+  tls:
+    trustedCertificates:
+      - secretName: iot-cluster-cluster-ca-cert
+        certificate: ca.crt
