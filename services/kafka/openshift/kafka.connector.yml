@@ -16,6 +16,5 @@ spec:
     database.dbname: "city-info"
     database.server.name: "city-info.updates"
     database.whitelist: city-info
-    table.whitelist: "meter_update,junction_update"
     database.history.kafka.bootstrap.servers: "iot-cluster-kafka-bootstrap:9093"
     database.history.kafka.topic: "city-info.updates.dbhistory"

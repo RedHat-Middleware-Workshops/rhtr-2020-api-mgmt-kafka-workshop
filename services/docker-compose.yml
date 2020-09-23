@@ -46,7 +46,7 @@ services:
     container_name: iot-sse-server
     build:
       context: iot-sse-server/
-      dockerfile: src/main/docker/Dockerfile.jvm
+      dockerfile: src/main/docker/Dockerfile.multistage
     ports:
       - "8083:8083"
     environment:
