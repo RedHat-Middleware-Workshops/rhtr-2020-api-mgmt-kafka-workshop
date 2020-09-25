@@ -6,6 +6,7 @@
 * Install the *Red Hat Integration - Camel K* Operator.
 * Run `oc apply -f integration.platform.yaml`.
 * Set the `TRANSPORT_MODE=kafka` in the environment on the `iot-data-generator` deployment.
+* Install Kamel CLI (https://camel.apache.org/camel-k/latest/cli/cli.html)
 
 ## Run the Integrations
 
@@ -18,6 +19,8 @@ kamel run MetersConsumer.java \
 --dependency mvn:org.postgresql:postgresql:42.2.10 \
 --dependency=camel-jdbc \
 --dependency=mvn:org.apache.commons:commons-dbcp2:2.7.0
+
+oc create configmap meters.kafka.props  --from-file=junction.properties
 
 kamel run JunctionsConsumer.java \
 --configmap=junction.kafka.props \

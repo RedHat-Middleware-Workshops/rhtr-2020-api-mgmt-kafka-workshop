@@ -6,7 +6,7 @@
 
 ## Services List
 
-The following is a list of the services deployed during the lab, and the
+The following is a list of the services running as containers during the lab, and the
 host/port combination that they're available on if deployed locally using
 Docker.
 
@@ -28,16 +28,16 @@ seeding the initial data into the database.
 
 ## Local Development via Docker
 
-*NOTE: Testing and development was performed using Docker Community v19. YMMV with different versions.*
+*NOTE: Testing and development was performed using Docker Engine Community v19. YMMV with different versions.*
 
 ```bash
 # Passing GOOGLE_MAPS_API_KEY is optional. If you don't pass a valid key
 # the sensor management UI will not display a map, but is otherwise OK
 docker-compose build --build-arg GOOGLE_MAPS_API_KEY=<an-api-key>
-docker-compose up -d
+docker-compose up
 ```
 
-After `docker-compose up -d` has finished, you'll have all services running.
+After inspecting `docker-compose up` we could see that, you'll have all services running.
 
 If you make changes to the services themselves, you can rebuild and redeploy
 like so:
@@ -45,7 +45,7 @@ like so:
 ```bash
 docker-compose build --build-arg GOOGLE_MAPS_API_KEY=<an-api-key>
 docker-compose down
-docker-compose up -d
+docker-compose up
 ```
 
 ## Services Usage in Lab Content
