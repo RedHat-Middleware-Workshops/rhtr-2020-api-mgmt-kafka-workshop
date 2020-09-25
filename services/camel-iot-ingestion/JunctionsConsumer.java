@@ -29,7 +29,7 @@ public class JunctionsConsumer extends RouteBuilder {
                 .unmarshal().json()
                 .log("Kafka message headers: ${headers}")
                 .log("Kafka message body: ${body}")
-                .setBody(simple("INSERT INTO junction_update(junction_id, timestamp, count_ns, count_ew) VALUES ('${body[junctionId]}', to_timestamp(${body[timestamp]}), '${body[count][ns]}', '${body[count][ew]}');"))
+                .setBody(simple("INSERT INTO junction_update(junction_id, timestamp, count_ns, count_ew) VALUES ('${body[junctionId]}', to_timestamp(${body[timestamp]}), '${body[counts][ns]}', '${body[counts][ew]}');"))
                 .log("SQL statement: ${body}")
                 .to("jdbc:datasource");            
     }
