@@ -7,11 +7,14 @@
 :codeready-url: http://che-che.{openshift-app-host}/
 :3scale-url: http://3scale-admin.{openshift-app-host}/
 
+// Che workspace variables
+:che-project-name: KafkaIoT
+
 // User specific URLS
 :user-topology-url: {openshift-host}/topology/ns/{namespace}
 
 // Kafka HTTP Bridge URL
-:kafka-bridge-service-url: http://iot-cluster-kafka-bridge-service.{namespace}.svc.cluster.local:8080
+:kafka-bridge-service-url: http://iot-cluster-kafka-bridge-service.{namespace}:8080
 
 // 3scale parking meters kafka bridge properties
 :3scale-kafka-base-name: kafka-service
@@ -64,7 +67,7 @@ That sure seems like a lot of work, but don't worry we'll be guiding you every s
 [type=walkthroughResource,serviceName=openshift]
 .Red Hat OpenShift
 ****
-* link:{openshift-console-url}[Console, window="_blank"]
+* link:{openshift-host}[Console, window="_blank"]
 * link:https://help.openshift.com/[Openshift Online Help Center, window="_blank"]
 * link:https://blog.openshift.com/[Openshift Blog, window="_blank"]
 ****
@@ -147,12 +150,23 @@ You have access to the following projects and can switch between them with 'oc p
 ----
 oc project {namespace}
 ----
+. Use the image below as a reference to verify your Che workspace is valid.
+
+image:images/screenshots/08-che-setup.png[Che Workspace Setup]
+
+{blank}
+
+[type=verification]
+Were you able to view the Che workspace and login using the `oc login` command in the terminal?
+
+[type=verificationFail]
+{standard-fail-text}
 
 === View the Project Topology and UI
 
 Some services for this lab were provisioned ahead of time to provide a streamlined lab experience. View these by following these instructions:
 
-. Login to the link:{openshift-console-url}/topology/ns/{namespace}/graph[OpenShift Console, window="_blank"] to view the *{namespace}* project.
+. Login to the link:{openshift-host}/topology/ns/{namespace}/graph[OpenShift Console, window="_blank"] to view the *{namespace}* project.
 . The Topology view should look similar to this screenshot.
 +
 image:images/screenshots/00-initial-project-topology.png[Initial Project Topology]
@@ -197,8 +211,10 @@ A Kafka Cluster is created by providing OpenShift with an instance of a *Kafka* 
 . Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
 . Click *+Add* on the left menu.
 . Click on the *From Catalog* option.
-. Type in `kafka` in the search text field and then click on *Kafka*.
-. Click the *Create* button.
+. Type in `kafka` in the search text field. You should see a list of Kafka resources that are provided by the operator.
++
+image:images/screenshots/09-kafka-add-resources.png[Available Operator Backed Kafka Resources]
+. Click on the *Kafka* item, review the details, then click the *Create* button.
 . Create a `Kafka` Custom Resource to define your connector. Replace the contents of the _YAML_ editor with the following code:
 +
 [source,yaml,subs="attributes+"]
@@ -271,7 +287,7 @@ The AMQ Streams operator will automatically create the Topic in the Kafka Cluste
 
 Now that a topic has been created, you'll want to start placing data into it! This can be achieved by deploying an application that acts as a Producer and writes messages to a Topic. 
 
-The included *iot-data-generator* is a Producer, but we won't be using it just yet. First, we'll deploy a Kafka Bridge that exposes a HTTP endpoint so we can send messages to the *meters* Topic via HTTP.
+The included *iot-data-generator* is a Producer, but you won't be using it just yet. First, you'll deploy a Kafka Bridge that exposes a HTTP endpoint so we can send messages to the *meters* Topic via HTTP.
 
 . Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
 . Click *+Add* on the left menu.
@@ -317,13 +333,13 @@ Now that the bridge has been created, you can use it place data into the *meters
 [source,bash,subs="attributes+"]
 ----
 curl -X POST \
-http://iot-cluster-kafka-bridge-service:8080/topics/meters \
+{kafka-bridge-service-url}/topics/meters \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
       {
-        "key": "key-1",
-        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"statusText":"unknown"}
+        "key": "F6PeB2XQRYG-8EN5yFcrP",
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1601316823,"statusText":"unknown"}
       }
   ]
 }'
@@ -481,7 +497,7 @@ curl -X POST \
 -d '{
   "records": [
       {
-        "key": "key-1",
+        "key": "F6PeB2XQRYG-8EN5yFcrP",
         "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"statusText":"unknown"}
       }
   ]
@@ -511,7 +527,7 @@ In this section you'll deploy a Consumer that processes the Parking Meter events
     * Run `oc get secret -n {namespace}` to verify that the secret name from the *meters.properties* is listed.
     * Run `oc get secret -n {namespace} -o yaml` to verify that the secret contains the keys referenced in *meters.properties*.
 . Open the *MetersConsumer.java* file. Note that the `dataSource.setUsername` and `dataSource.setPassword` are being set to the values from the *meters.properties*.
-. Change directory using the `cd iot-lab/services/camel-iot-ingestion` command.
+. Change directory using the `cd {che-project-name}/services/camel-iot-ingestion` command.
 . Run the following command to create a ConfigMap to store the *meter.properties* file. CamelK will use this:
 +
 [source,bash,subs="attributes+"]
@@ -568,7 +584,7 @@ curl -X POST \
 -d '{
   "records": [
       {
-        "key": "key-1",
+        "key": "F6PeB2XQRYG-8EN5yFcrP",
         "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"statusText":"unknown"}
       }
   ]
