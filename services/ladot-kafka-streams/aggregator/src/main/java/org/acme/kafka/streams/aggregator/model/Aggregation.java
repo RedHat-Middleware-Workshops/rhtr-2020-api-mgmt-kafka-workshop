@@ -25,10 +25,21 @@ public class Aggregation {
         String longitude
     ) {
         this.address = address;
-        this.meter_id= meter_id;
+        this.meter_id = meter_id;
         this.status_text = status_text;
         this.timestamp = timestamp;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public Aggregation updateFrom(Aggregation a) {
+        this.address = a.address;
+        this.meter_id = a.meter_id;
+        this.status_text = a.status_text;
+        this.timestamp = a.timestamp;
+        this.latitude = a.latitude;
+        this.longitude = a.longitude;
+
+        return this;
     }
 }
