@@ -49,7 +49,7 @@ You're assigned the following tasks:
 * Protect the Kafka HTTP Bridge using 3scale API Management.
 * Send meter data to the 3scale endpoint. We'll supply an IoT device simulator to help with this!
 * Deploy a CamelK route that inserts IoT data into a pre-configured Postgres database.
-* Create AMQ Streams Kafka Connect and Kafka Connector instance. These will enable Debezium CDC to propagate database events to services connected to relevant Kafka Topics.
+* Create AMQ Streams Kafka Connect and Kafka Connector instance. These will enable Debezium CDC to propagate Postgres database events to services connected to relevant Kafka Topics.
 * Expose the IoT data in real-time using Quarkus.
 * Protect the Quarkus real-time IoT data service using 3scale API Management.
 * View the real-time data on a pre-configured mobile application.
@@ -322,7 +322,7 @@ image:images/screenshots/05-topology-with-kafka-bridge.png[Topology View with Ka
 
 === Verify the Cluster, Topics, and Bridge
 
-Now that the bridge has been created, you can use it place data into the *meters* Topic. By default, the Kafka HTTP Bridge is secure, and does not expose an OpenShift Route. Sending a POST request using cURL from the terminal in CodeReady Workspaces will work, since it is running within the OpenShift cluster and can access other services running in the cluster.
+Now that the bridge has been created, you can use it place data into the *meters* Topic. By default, the Kafka HTTP Bridge is does not expose an OpenShift Route so it cannot be accessed from outside the cluster. Sending a POST request using cURL from the terminal in CodeReady Workspaces will work, since it is running within the OpenShift cluster and can access other services running in the cluster.
 
 . Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
 . To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
@@ -339,7 +339,7 @@ curl -X POST \
   "records": [
       {
         "key": "F6PeB2XQRYG-8EN5yFcrP",
-        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1601316823,"statusText":"unknown"}
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1601316823,"status":"unknown"}
       }
   ]
 }'
@@ -347,7 +347,7 @@ curl -X POST \
 . A successful response will look similar to this JSON: `{"offsets":[{"partition":1,"offset":0}]}`
 
 [type=verification]
-Did you receive a successful JSON response from the Kafka HTTP Bridge?
+Did you receive a JSON response from the Kafka HTTP Bridge that is similar to the provided example?
 
 [type=verificationFail]
 {standard-fail-text}
@@ -498,7 +498,7 @@ curl -X POST \
   "records": [
       {
         "key": "F6PeB2XQRYG-8EN5yFcrP",
-        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"statusText":"unknown"}
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"status":"unknown"}
       }
   ]
 }'
@@ -520,15 +520,24 @@ In this section you'll deploy a Consumer that processes the Parking Meter events
 
 === Deployment using the Kamel CLI
 . Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
-. You'll need a terminal shortly, so open one by clicking on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*/
-. Expand the *iot-lab/services/camel-iot-ingestion* folder, and open the *meters.properties* file.
+. Select Terminal > Open Terminal in specific container and select the container that begins with "dil-" (followed by a 5-digit alphanumeric code). Click it and a terminal window should open.
++
+image:images/screenshots/10-che-kamel-terminal.png[Opening the DIL Container with Kamel Support]
+. Verify you have a terminal session in the correct container by running the `kamel --help` command. The help output will be printed if you're in the correct container.
+. Login using the following command:
++
+[source,bash,subs="attributes+"]
+----
+oc login -u {user-username} -p {user-password} https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true
+----
+. Expand the *{che-project-name}/services/camel-iot-ingestion* folder, and open the *meters.properties* file.
 . Verify that the *kafka.host* and *kafka.port* values are correct. Do this by running `oc get svc -n {namespace}` and finding the corresponding host and ports in the terminal output. Amend the *meters.properties* file if necessary.
 . Verify that the *db.username* and *db.password* are referencing the correct values:
-    * Run `oc get secret -n {namespace}` to verify that the secret name from the *meters.properties* is listed.
-    * Run `oc get secret -n {namespace} -o yaml` to verify that the secret contains the keys referenced in *meters.properties*.
-. Open the *MetersConsumer.java* file. Note that the `dataSource.setUsername` and `dataSource.setPassword` are being set to the values from the *meters.properties*.
+    * Run `oc get secret -n {namespace}` to verify that the *pg-login* secret from the *meters.properties* is listed.
+    * Run `oc get secret/pg-login -n {namespace} -o yaml` to verify that the secret contains the keys referenced in *meters.properties*.
+. Open the *MetersConsumer.java* file. Note that the `dataSource.setUsername` and `dataSource.setPassword` are being set to the values from the *meters.properties* using the `PropertyInject` annotation.
 . Change directory using the `cd {che-project-name}/services/camel-iot-ingestion` command.
-. Run the following command to create a ConfigMap to store the *meter.properties* file. CamelK will use this:
+. Run the following command to create a ConfigMap to store the *meter.properties* file:
 +
 [source,bash,subs="attributes+"]
 ----
@@ -536,10 +545,10 @@ oc create configmap meters.kafka.props --from-file=meters.properties
 ----
 . The next command will deploy the *MetersConsumer.java* file that implements this integration. Note that command-line flags:
     * Target the correct namespace.
-    * Include a reference to the *pg-login* Secret you checked previously.
-    * Include the ConfigMap contain *meters.properties*.
+    * Include a reference to the *pg-login* Secret you verified.
+    * Include the ConfigMap that contains the *meters.properties*.
     * Specify required dependencies.
-. Use `kamel run` to deploy the integration:
+. Use the following `kamel run` command to deploy the integration:
 +
 [source,bash,subs="attributes+"]
 ----
@@ -564,6 +573,7 @@ You can run the following commands to view the resources created by the *Red Hat
 
 . Use `oc get bc -n {namespace}` to list BuildConfigs. The list will contain a BuildConfig starting with "camel".
 . The `oc get builds` command will return a list of Builds. You will be able to find one starting with "camel", e.g "camel-k-kit-btmvls9ki". View the logs using `oc logs`, e.g `oc logs camel-k-kit-btmvls9ki-builder`.
+. You can also view this information by visiting the link:{openshift-host}/k8s/ns/{namespace}/buildconfigs[BuildConfigs, window="_blank"] screen.
 
 Once you're finished exploring these resources, you can monitor the integration:
 
@@ -585,7 +595,7 @@ curl -X POST \
   "records": [
       {
         "key": "F6PeB2XQRYG-8EN5yFcrP",
-        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"statusText":"unknown"}
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"status":"unknown"}
       }
   ]
 }'
@@ -594,11 +604,205 @@ curl -X POST \
 +
 image:images/screenshots/07-camelk-success-logs.png[CamelK Meters Consumer Logs]
 . Using the screenshot above as a reference, confirm the JSON you sent via cURL is shown as the Kafka message body. An SQL INSERT statement should also be printed. No errors should be displayed.
+. Next, you'll verify that the INSERT to the database worked as expected. Get started by opening the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
+. Select the *iot-psql* node. A details pane should appear on the right. Select the *Resources* tab, and click the Pod name.
+. Navigate the *Terminal* tab from the *Pod Details* screen and run the following commands to query the database:
+[source,bash,subs="attributes+"]
+----
+psql -d $POSTGRES_DB -U $POSTGRES_USER
+
+select * from meter_update;
+----
+. You should see output similar to this screenshot:
++
+image:images/screenshots/11-psql-meter-update.png[Postgres Meter Update Table Entries]
 
 {blank}
 
 [type=verification]
-Was your JSON processed by the CamelK integration?
+Was your JSON processed by the CamelK integration and insterted into the *meter_update* table?
 
 [type=verificationFail]
 Did you get a successful response from the 3scale API endpoint? Is the CamelK integration able to connect to the Postgres database? {standard-fail-text}
+
+[time=15]
+== Kafka Configuration for Change Data Capture
+
+Now data can flow from IoT devices to Kafka Topics via 3scale API Management. Downstream applications may want to be alerted of the database operations triggered by the integrations you've created.
+
+To facilitate this, you'll setup *change data capture* using Debezium to stream database events to a Kafka Topic via Kafka Connect.
+
+=== Deploy Kafka Connect
+. The Postgres instance used in this lab has been pre-configured with the Debezium extensions, so you will configure a Kafka Connect to communicate with it.
+. Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
+. Click *+Add* on the left menu.
+. Click on the *From Catalog* option.
+. Type in `kafka` in the search text field and then click on *Kafka Connect*.
+. Click the *Create* button.
+. Replace the contents of the editor with the following YAML. This YAML configures the Kafka Connect instance to connect to the Kafka cluster you created earlier. It also uses a pre-built image that contains the *link:https://github.com/debezium/debezium/tree/master/debezium-connector-postgres[Debezium Postgres Connector, window="_blank"]*.
++
+[source,yaml,subs="attributes+"]
+----
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaConnect
+metadata:
+  name: iot-connect-cluster
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 2.5.0
+  replicas: 1
+  bootstrapServers: 'iot-cluster-kafka-bootstrap:9093'
+  image: quay.io/evanshortiss/rhtr-2020-kafka-connect-pgsql:latest
+  tls:
+    trustedCertificates:
+      - secretName: iot-cluster-cluster-ca-cert
+        certificate: ca.crt
+----
+. Click *Create*.
+. You should see the Kafka Connect instance in the link:{user-topology-url}[Topology View, window="_blank"] after a few seconds.
++
+image:images/screenshots/12-kafka-connect-topology.png[Kafka Connect in the Topology View]
+
+=== Create a Kafka Connector
+
+Now that a Kafka Connect instance is running, you need to deploy a Kafka Connector.
+
+. Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
+. Click *+Add* on the left menu.
+. Click on the *From Catalog* option.
+. Type in `kafka` in the search text field and then click on *Kafka Connector*.
+. Click the *Create* button.
+. Replace the contents of the editor with the following YAML. This defines a Kafka Connector that will use the Debezium Postgres Connector to create a stream of database events.
++
+[source,yaml,subs="attributes+"]
+----
+apiVersion: kafka.strimzi.io/v1alpha1
+kind: KafkaConnector
+metadata:
+  name: updates-connector
+  labels:
+    strimzi.io/cluster: iot-connect-cluster
+spec:
+  class: io.debezium.connector.postgresql.PostgresConnector
+  tasksMax: 1
+  config:
+    connector.class: "io.debezium.connector.postgresql.PostgresConnector"
+    database.hostname: "iot-psql"
+    database.port: "5432"
+    database.user: "rhtr-user"
+    database.password: "rhtr-password"
+    database.dbname: "city-info"
+    database.server.name: "city-info.updates"
+    database.whitelist: city-info
+    database.history.kafka.bootstrap.servers: "iot-cluster-kafka-bootstrap:9093"
+    database.history.kafka.topic: "city-info.updates.dbhistory"
+----
+. Click *Create* to create the Connector.
+. Select the Kafka Connect node (*iot-connect-cluster-connect*) on the link:{user-topology-url}[Topology View, window="_blank"], and select the Pod listed on the *Resources* tab.
+. Navigate to the *Logs* tab on the *Pod Details* screen.
+. Verify that a connection to Postgres was established by searching for `INFO user 'rhtr-user' connected to database 'city-info' on PostgreSQL`. The logs should look similar to the screenshot below.  
++
+image:images/screenshots/13-kafka-psql-connector.png[Logs for Kafka Connector to Postgres]
+
+[type=verification]
+Do the Kafka Connect logs report that the Postgres Connector successfully connected to the Postgres instance?
+
+[type=verificationFail]
+{standard-fail-text}
+
+=== Send a Message to the Meters Topic
+
+To verify the Connector is working as expected you'll want to send a new message to be processed. This will trigger an INSERT to the *meter_update* table that Debezium will capture.
+
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
+. To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Run a `date +%s` command to get a valid timestamp for the request payload.
+. From the terminal, run the following command to place a message into the *meters* Topic. Replace the `timestamp` value with the output from the previous `date` command:
++
+[source,bash,subs="attributes+"]
+----
+curl -X POST \
+{3scale-kafka-staging-api-host}/topics/meters?user_key=YOUR_KEY_HERE \
+-H 'content-type: application/vnd.kafka.json.v2+json' \
+-d '{
+  "records": [
+      {
+        "key": "F6PeB2XQRYG-8EN5yFcrP",
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"status":"unknown"}
+      }
+  ]
+}'
+----
+. A successful response will look similar to this JSON: `{"offsets":[{"partition":1,"offset":0}]}`
+
+=== Examine the Kafka Topics Listing
+
+. Navigate to the link:{openshift-host}/k8s/cluster/projects/{namespace}[Administrator View] for your project.
+. Expand the *Operators* section on the left and select *Installed Operators*.
+. Select the *Red Hat Integration - AMQ Streams* operator. This will display the *Operator Details* screen.
+. Navigate to the *Kafka Topic* tab. You should see the *meters* Topic you created using YAML earlier in this lab, but you should also see Topics with the prefix *city-info.updates*.
++
+image:images/screenshots/14-kafka-topics-list.png[Kafka Topics Listing]
+. Click the Topic that starts with *city-info.updates.public.meter-update*, and is followed by a unique ID. This will load the *KafkaTopic Details* screen.
+. Switch to the *YAML* tab and find the `topicName` field in the YAML. It should have the value `city-info.updates.public.meter_update`. Take note of this since it is required in the next section.
+
+{blank}
+
+[type=verification]
+Does the Topics list contain items prefixed with *city-info.updates*, e.g *city-info.updates.public.meter-update---$UNIQUE_ID*?
+
+[type=verificationFail]
+{standard-fail-text}
+
+=== View the Change Data Capture Stream
+
+. Navigate to the link:{openshift-host}/k8s/ns/{namespace}/pods/iot-cluster-kafka-0/terminal[iot-cluster-kafka-0 Pod Terminal, window="_blank"].
+. Run the following command to view the messages in the CDC Kafka Topic representing the *meter_update* table from Postgres:
++
+[source,bash,subs="attributes+"]
+----
+./bin/kafka-console-consumer.sh --topic city-info.updates.public.meter_update --from-beginning --bootstrap-server localhost:9092
+----
+. This should print a series of JSON objects representing the INSERT operations that were performed on the *meter_update* table. Running cURL requests to the Kafka HTTP Bridge will produce more JSON objects.
++
+image:images/screenshots/15-kafka-meter-updates-topic.png[Kafka Meter Update Topic Data]
+
+{blank}
+
+[type=verification]
+Were you able to view entries in the *city-info.updates.public.meter_update* Topic via the Pod terminal?
+
+[type=verificationFail]
+{standard-fail-text}
+
+[time=15]
+== Deploy a Quarkus Kafka Streams Application
+
+With CDC up and running, you can use the new Topics to expose live update functionality to Kafka Consumers that are interested in it.
+
+In this lab, a field workforce mobile application will be the Consumer of this information. Using this application, a city engineer could monitor live parking meter data and observe faults in real-time.
+
+However, connecting a mobile application directly to the CDC generated Topics would be inefficient. The generated messages are incredibly verbose, and the application would need to subscribe to both Topics for `meter_update` and `meter` tables to obtain all relevant information. This would result in increased bandwidth and battery usage, and also tightly couple the application to the CDC generated Topic data structures.
+
+In this section you'll use Kafka Streams to create a new Topic. This Topic will contain simplified JSON Objects with the relevant fields from both CDC Topics that the mobile application can consume.
+
+As a reminder the following fields will be required by the mobile application to display a real-time feed of IoT events:
+
+* Address (from `meter`)
+* Latitude (from `meter`)
+* Longitude (from `meter`)
+* Status (from `meter_update`)
+* Timestamp (from `meter_update`)
+
+=== Deploy the Kafka Streams Quarkus Application
+
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
+. To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Change directory using the `cd {che-project-name}/services/ladot-kafka-streams/aggregator` command.
+. Run the following commands to build and deploy the Kafka Streams service:
+[source,bash,subs="attributes+"]
+----
+mvn clean install
+mvn clean package -Dquarkus.container-image.build=true
+----
