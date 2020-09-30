@@ -38,5 +38,4 @@ spec:
     type: Generic
   - type: ConfigChange
   - imageChange:
-      lastTriggeredImageID: quay.io/evanshortiss/s2i-nodejs-nginx@sha256:3022afab7cbb753148fc2d3f4ef271eb267356b42c9f674f64273047f121c4a7
     type: ImageChange
