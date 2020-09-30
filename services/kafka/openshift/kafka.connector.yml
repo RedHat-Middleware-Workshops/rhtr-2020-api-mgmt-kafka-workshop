@@ -12,7 +12,7 @@ spec:
     database.hostname: "iot-psql"
     database.port: "5432"
     database.user: "rhtr-user"
-    database.password: "rhtr-pass"
+    database.password: "rhtr-password"
     database.dbname: "city-info"
     database.server.name: "city-info.updates"
     database.whitelist: city-info
