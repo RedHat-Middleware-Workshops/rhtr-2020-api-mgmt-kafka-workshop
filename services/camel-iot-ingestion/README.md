@@ -20,7 +20,7 @@ kamel run MetersConsumer.java \
 --dependency=camel-jdbc \
 --dependency=mvn:org.apache.commons:commons-dbcp2:2.7.0
 
-oc create configmap meters.kafka.props  --from-file=junction.properties
+oc create configmap junctions.kafka.props  --from-file=junctions.properties
 
 kamel run JunctionsConsumer.java \
 --configmap=junction.kafka.props \
