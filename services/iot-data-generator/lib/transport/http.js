@@ -43,7 +43,10 @@ module.exports = function getKafkaTransport() {
           status
         })
 
-        const u = new URL('/topics/meters', HTTP_HOST)
+        const u = new URL(HTTP_HOST)
+        // Set URL outside constructor to preserve
+        // possible querystring params from env
+        u.pathname = '/topics/meters'
 
         await got.post(u.toString(), {
           headers: {
@@ -71,7 +74,10 @@ module.exports = function getKafkaTransport() {
           timestamp
         })
 
-        const u = new URL('/topics/junctions', HTTP_HOST)
+        const u = new URL(HTTP_HOST)
+        // Set URL outside constructor to preserve
+        // possible querystring params from env
+        u.pathname = '/topics/junctions'
 
         await got.post(u.toString(), {
           headers: {
