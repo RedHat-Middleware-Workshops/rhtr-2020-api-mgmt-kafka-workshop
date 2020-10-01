@@ -5,9 +5,11 @@ import { getMeterEventsUrl } from '../utils';
 
 interface MeterData {
   address: string
-  status: string
-  uuid: string
-  ts: string
+  status_text: string
+  meter_id: string
+  timestamp: number
+  latitude: string
+  longitude: string
 }
 
 
@@ -108,10 +110,10 @@ const Meters: React.FC = () => {
   if (events.length !== 0) {
     const listItems = events.map((e) => {
       return (
-        <IonItem className="blink" key={e.uuid}>
+        <IonItem className="blink" key={`${e.meter_id}-${e.timestamp}`}>
           <IonLabel>
             <h2>{e.address}</h2>
-            <p>{e.status.toUpperCase()} as of {new Date(e.ts).toLocaleTimeString()}</p>
+            <p>{e.status_text.toUpperCase()} as of {new Date(e.timestamp/1000).toLocaleTimeString()}</p>
           </IonLabel>
         </IonItem>
       )
