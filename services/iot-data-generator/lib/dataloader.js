@@ -5,7 +5,6 @@ const csv = require('csvtojson')
 const log = require('barelog')
 const Junction = require('./classes/junction')
 const Meter = require('./classes/meter')
-const { MONGO_CONNECTION_STRING } = require('./config')
 
 /**
  * Reads data from CSV, creates Junction and Meter instances, and loads
@@ -19,47 +18,6 @@ module.exports = async function createDataloader () {
     getMeters: () => meters,
     getJunctions: () => junctions
   }
-}
-
-/**
- * Seed the database with all junctions
- * @param {Junction[]} junctions
- * @param {MongoClient.db}
- */
-async function insertJunctions (junctions, db) {
-  const collection = db.collection('junction')
-  log('drop existing junctions collection')
-  try {
-    await collection.drop()
-  } catch (e) {
-    log(e)
-  }
-  log('inserting junctions into mongodb')
-  await collection.insertMany(junctions.map(j => j.toJSON()), { ordered: true })
-}
-
-/**
- * Seed the database with all meters
- * @param {Meter[]} meters
- * @param {MongoClient.db}
- */
-async function insertMeters (meters, db) {
-  log('inserting meters into mongodb')
-  const collection = db.collection('meter')
-  try {
-    await collection.drop()
-  } catch (e) {
-    log(e)
-  }
-  await collection.insertMany(meters.map(m => {
-    const data = m.toJSON()
-    return {
-      uuid: data.uuid,
-      address: data.address,
-      latitude: data.latitude,
-      longitude: data.longitude
-    }
-  }), { ordered: true })
 }
 
 /**

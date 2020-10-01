@@ -11,7 +11,7 @@ metadata:
     app.openshift.io/runtime: nodejs
   name: iot-data-generator
 spec:
-  replicas: 1
+  replicas: 0
   revisionHistoryLimit: 10
   selector:
     app: iot-data-generator
@@ -42,6 +42,9 @@ spec:
         ports:
         - containerPort: 8080
           protocol: TCP
+        env:
+        - name: TRANSPORT_MODE
+          value: kafka
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File

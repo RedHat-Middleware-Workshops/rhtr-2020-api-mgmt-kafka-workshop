@@ -1,0 +1,19 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  labels:
+    app: mobile-app
+  name: s2i-nodejs-nginx
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - annotations:
+      openshift.io/imported-from: quay.io/evanshortiss/s2i-nodejs-nginx
+    from:
+      kind: DockerImage
+      name: quay.io/evanshortiss/s2i-nodejs-nginx
+    importPolicy: {}
+    name: latest
+    referencePolicy:
+      type: Source

@@ -35,6 +35,16 @@ spec:
       - env:
         - name: NODE_ENV
           value: dev
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_USER
+              name: pg-login
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_PASSWORD
+              name: pg-login
         image: iot-graphql-api:latest
         imagePullPolicy: IfNotPresent
         name: iot-graphql-api

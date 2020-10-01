@@ -1,7 +1,7 @@
 apiVersion: kafka.strimzi.io/v1beta1
 kind: KafkaTopic
 metadata:
-  name: city-info.updates.dbhistory
+  name: meter-event-aggregated
   labels:
     strimzi.io/cluster: iot-cluster
 spec:

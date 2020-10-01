@@ -4,13 +4,14 @@ const { get } = require('env-var')
 
 const SUPPORTED_TRANSPORTS = {
   CONSOLE: 'console',
-  KAFKA: 'kafka'
+  KAFKA: 'kafka',
+  HTTP: 'http'
 }
 
 module.exports = {
   HTTP_PORT: get('HTTP_PORT').default('8080').asPortNumber(),
   KAFKA_HOST: get('KAFKA_HOST').default('iot-cluster-kafka-brokers:9092').asString(),
-  MONGO_CONNECTION_STRING: get('MONGO_CONNECTION_STRING').default('mongodb://mongoadmin@mongoadmin@city-mongodb:27017/').asUrlString(),
+  HTTP_HOST: get('HTTP_HOST').asString(),
   SUPPORTED_TRANSPORTS,
   TRANSPORT_MODE: get('TRANSPORT_MODE').default('console').asEnum(Object.values(SUPPORTED_TRANSPORTS))
 }

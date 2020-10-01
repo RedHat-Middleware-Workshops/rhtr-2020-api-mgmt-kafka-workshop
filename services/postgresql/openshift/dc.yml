@@ -1,5 +1,5 @@
-kind: DeploymentConfig
 apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
 metadata:
   annotations:
     openshift.io/generated-by: OpenShiftWebConsole
@@ -56,6 +56,16 @@ spec:
           env:
             - name: PGDATA
               value: /data/data
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  key: POSTGRES_USER
+                  name: pg-login
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: POSTGRES_PASSWORD
+                  name: pg-login
           ports:
             - containerPort: 5432
               protocol: TCP

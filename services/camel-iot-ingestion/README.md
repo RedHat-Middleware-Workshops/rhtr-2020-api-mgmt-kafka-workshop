@@ -13,14 +13,18 @@
 ```bash
 oc create configmap meters.kafka.props  --from-file=meters.properties
 
-kamel run MetersConsumer.java --configmap=meters.kafka.props \
+kamel run MetersConsumer.java \
+--configmap=meters.kafka.props \
+--secret pg-login \
 --dependency mvn:org.postgresql:postgresql:42.2.10 \
 --dependency=camel-jdbc \
 --dependency=mvn:org.apache.commons:commons-dbcp2:2.7.0
 
 oc create configmap junctions.kafka.props  --from-file=junctions.properties
 
-kamel run JunctionsConsumer.java --configmap=junctions.kafka.props \
+kamel run JunctionsConsumer.java \
+--configmap=junction.kafka.props \
+--secret pg-login \
 --dependency mvn:org.postgresql:postgresql:42.2.10 \
 --dependency=camel-jdbc \
 --dependency=mvn:org.apache.commons:commons-dbcp2:2.7.0
