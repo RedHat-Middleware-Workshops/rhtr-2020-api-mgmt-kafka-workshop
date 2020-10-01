@@ -64,9 +64,6 @@ public class TopologyProducer {
                     LOG.info("mapping meter update for meter:" + v.id);
                     return KeyValue.pair(v.meter_id, v);
                 })
-                .peek((k, v) -> {
-                    LOG.info("Key: " + k + ", Value: " + v.toString());
-                })
                 .join(
                     meters,
                     (update, info) -> {
