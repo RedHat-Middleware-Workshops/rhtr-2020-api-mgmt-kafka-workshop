@@ -45,11 +45,7 @@ public class TopologyProducer {
         meterUpdateSerde.configure(Collections.singletonMap("from.field", "after"), false);
     
         JsonbSerde<Aggregation> aggregationSerde = new JsonbSerde<>(Aggregation.class);
-        LOG.info("created serdes instances");
-
-        // KTable<String, MeterInfo> meters = builder.table(METER_INFO_TOPIC, Consumed.with(Serdes.String(), meterInfoSerde));
-        LOG.info("created KTable for topic: " + METER_INFO_TOPIC);
-
+        
         // Generate a simplified key value mapped table of meter info, i.e: "meter_id:address,lat,lng" etc
         KTable<String, MeterInfo> meters = builder.stream(METER_INFO_TOPIC, Consumed.with(Serdes.String(), meterInfoSerde))
             .map((k, v) -> {
@@ -60,27 +56,27 @@ public class TopologyProducer {
             .toTable();
 
         builder.stream(METER_UPDATE_TOPIC, Consumed.with(Serdes.String(), meterUpdateSerde))
-                .map((k, v) -> {
-                    LOG.info("mapping meter update for meter:" + v.id);
-                    return KeyValue.pair(v.meter_id, v);
-                })
-                .join(
-                    meters,
-                    (update, info) -> {
-                        LOG.info("Joining meter_update with ID " + update.meter_id + " to meter info with ID " + info.id);
+            .map((k, v) -> {
+                LOG.info("mapping meter update for meter:" + v.meter_id);
+                return KeyValue.pair(v.meter_id, v);
+            })
+            .join(
+                meters,
+                (update, info) -> {
+                    LOG.info("Joining meter_update with ID " + update.meter_id + " to meter info with ID " + info.id);
 
-                        return new Aggregation(
-                            info.address,
-                            update.meter_id,
-                            update.status_text,
-                            update.timestamp,
-                            info.latitude,
-                            info.longitude
-                        );
-                    },
-                    Joined.with(Serdes.String(), meterUpdateSerde, meterInfoSerde)
-                )
-                .to(METER_DATA_AGGREGATED_TOPIC, Produced.with(Serdes.String(), aggregationSerde));
+                    return new Aggregation(
+                        info.address,
+                        update.meter_id,
+                        update.status_text,
+                        update.timestamp,
+                        info.latitude,
+                        info.longitude
+                    );
+                },
+                Joined.with(Serdes.String(), meterUpdateSerde, meterInfoSerde)
+            )
+            .to(METER_DATA_AGGREGATED_TOPIC, Produced.with(Serdes.String(), aggregationSerde));
 
         return builder.build();
     }
