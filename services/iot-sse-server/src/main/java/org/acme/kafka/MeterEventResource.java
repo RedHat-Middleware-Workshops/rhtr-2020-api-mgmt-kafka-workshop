@@ -9,12 +9,15 @@ import javax.ws.rs.core.MediaType;
 import org.jboss.resteasy.annotations.SseElementType;
 import org.reactivestreams.Publisher;
 
+import io.smallrye.reactive.messaging.annotations.Broadcast;
+
 import org.eclipse.microprofile.reactive.messaging.Channel;
 
 @Path("/meters")
 public class MeterEventResource {
 
     @Inject
+    @Broadcast
     @Channel("meter-events")
     Publisher<MeterEvent> meterEvents;
 
