@@ -31,6 +31,13 @@ GENERATOR_METERS_ENABLED=true GENERATOR_JUNCTIONS_ENABLED=true mvn quarkus:dev
 
 Then, open your browser to `http://localhost:8080/meters.html`, and you should see a JSON data.
 
+## Deploy on OpenShift
+
+```bash
+mvn clean install
+mvn clean package -Dquarkus.container-image.build=true
+oc new-app --image-stream="$PROJECT_NAME/iot-sse-server:1.0-SNAPSHOT"
+```
 
 ## Running in Native Mode
 

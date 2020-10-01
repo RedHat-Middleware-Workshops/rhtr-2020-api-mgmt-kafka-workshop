@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.acme</groupId>
-  <artifactId>kafka-quickstart</artifactId>
+  <artifactId>iot-sse-server</artifactId>
   <version>1.0-SNAPSHOT</version>
   <properties>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
@@ -31,6 +31,10 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-openshift</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

@@ -1,15 +1,11 @@
 package org.acme.kafka;
 import io.quarkus.arc.profile.IfBuildProfile;
 import org.jboss.logging.Logger;
-
+import java.time.Instant;
 import java.time.Duration;
 import java.util.Random;
-import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
-import java.util.TimeZone;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -35,29 +31,28 @@ public class MeterEventGenerator {
     @Outgoing("generated-meter-events")
     public Multi<String> generate() {
         return Multi.createFrom().ticks().every(Duration.ofSeconds(5))
-                .onOverflow().drop()
-                .map(tick -> {
-                    if (this.enabled == "false") {
-                        // TODO: build properties to disable the bean instead
-                        return "{}";
-                    }
+            .onOverflow().drop()
+            .map(tick -> {
+                if (this.enabled == "false") {
+                    // TODO: build properties to disable the bean instead
+                    return "{}";
+                }
 
-                    LOG.info("writing generated message to topic");
-                    
-                    TimeZone tz = TimeZone.getTimeZone("UTC");
-                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-                    df.setTimeZone(tz);
-                    String currentIsoTime = df.format(new Date());
+                LOG.info("writing generated message to topic");
+                
+                long curTime = Instant.now().toEpochMilli() * 1000;
 
-                    MeterEvent m = new MeterEvent(
-                        "Generated Meter",
-                        "generated-uuid(" +random.nextInt() + ")",
-                        statusTypes.get(random.nextInt(statusTypes.size())),
-                        df.format(new Date())
-                    );
+                MeterEvent m = new MeterEvent(
+                    "6201 W SUNSET BLVD",
+                    "F6PeB2XQRYG-8EN5yFcrP",
+                    statusTypes.get(random.nextInt(statusTypes.size())),
+                    "34.098115",
+                    "-118.32448",
+                    curTime
+                );
 
-                    return m.toJSON();
-                });
+                return m.toJSON();
+            });
     }
 
 }
