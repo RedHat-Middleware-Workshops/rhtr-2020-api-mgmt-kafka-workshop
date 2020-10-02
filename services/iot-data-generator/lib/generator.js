@@ -10,15 +10,15 @@ const { SEND_INTERVAL_MAX_MS, SEND_COUNT_MIN, SEND_COUNT_MAX} = require('./confi
 // assigned that's used to create a distribution of states
 const meterStateWeights = [
   {
-    weight: 0.5,
+    weight: 0.55,
     text: Meter.STATES.OCCUPIED
   },
   {
-    weight: 0.2,
+    weight: 0.25,
     text: Meter.STATES.AVAILABLE
   },
   {
-    weight: 0.2,
+    weight: 0.1,
     text: Meter.STATES.UNKNOWN
   },
   {
