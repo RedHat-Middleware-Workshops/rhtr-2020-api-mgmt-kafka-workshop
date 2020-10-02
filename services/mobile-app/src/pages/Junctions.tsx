@@ -1,6 +1,5 @@
 import React from 'react';
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
 import './Junctions.css';
 
 const Junctions: React.FC = () => {
@@ -17,7 +16,9 @@ const Junctions: React.FC = () => {
             <IonTitle size="large">Junctions</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <ExploreContainer name="Junctions page" />
+        <IonContent className="ion-padding ion-text-center">
+          <h2>Under Construction</h2>
+        </IonContent>
       </IonContent>
     </IonPage>
   );
