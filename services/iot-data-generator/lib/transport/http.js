@@ -16,14 +16,14 @@ module.exports = function getKafkaTransport() {
     /**
      * Creates a POST body compliant with the Kafka HTTP Bridge format.
      * @param {String} key
-     * @param {Array|Object} data
+     * @param {Array|Object} value
      */
-    function createKafkaPostBodyWithData (key, data) {
+    function createKafkaPostBodyWithData (key, value) {
       return {
         records: [
           {
             key,
-            data
+            value
           }
         ]
       }
@@ -52,8 +52,7 @@ module.exports = function getKafkaTransport() {
           headers: {
             'content-type': 'application/vnd.kafka.json.v2+json'
           },
-          body: JSON.stringify(body),
-          responseType: 'json'
+          body: JSON.stringify(body)
         })
       },
 
@@ -83,8 +82,7 @@ module.exports = function getKafkaTransport() {
           headers: {
             'content-type': 'application/vnd.kafka.json.v2+json'
           },
-          body: JSON.stringify(body),
-          responseType: 'json'
+          body: JSON.stringify(body)
         })
       }
     })
