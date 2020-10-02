@@ -1,9 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    openshift.io/generated-by: OpenShiftWebConsole
-  creationTimestamp: "2020-09-11T12:02:35Z"
   labels:
     app: iot-sse-server
     app.openshift.io/runtime: quarkus
@@ -25,9 +22,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations:
-        openshift.io/generated-by: OpenShiftWebConsole
-      creationTimestamp: null
       labels:
         app: iot-sse-server
         deploymentconfig: iot-sse-server

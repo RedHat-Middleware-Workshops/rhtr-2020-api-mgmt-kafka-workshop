@@ -1,8 +1,6 @@
 apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
-  annotations:
-    openshift.io/generated-by: OpenShiftWebConsole
   labels:
     app: iot-data-generator
     app.kubernetes.io/component: iot-data-generator
@@ -28,8 +26,6 @@ spec:
     type: Rolling
   template:
     metadata:
-      annotations:
-        openshift.io/generated-by: OpenShiftWebConsole
       creationTimestamp: null
       labels:
         app: iot-data-generator
@@ -62,6 +58,5 @@ spec:
       from:
         kind: ImageStreamTag
         name: iot-data-generator:latest
-      lastTriggeredImage: quay.io/evanshortiss/rhtr-2020-iot-datagen@sha256:8c41139447adffbf4a06e278e2d88857eab798eebfcfd0853a90e435841bd365
     type: ImageChange
   - type: ConfigChange

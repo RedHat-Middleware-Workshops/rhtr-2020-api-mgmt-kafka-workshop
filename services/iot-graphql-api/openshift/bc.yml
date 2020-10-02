@@ -38,5 +38,4 @@ spec:
     type: Generic
   - type: ConfigChange
   - imageChange:
-      lastTriggeredImageID: image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:2bfd71b41a1591a1ea19513cb92e5c1f43d235bbdf15b114b8fddd5521e99482
     type: ImageChange

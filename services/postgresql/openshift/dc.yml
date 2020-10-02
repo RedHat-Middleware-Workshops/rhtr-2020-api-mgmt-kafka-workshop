@@ -1,8 +1,6 @@
 apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
-  annotations:
-    openshift.io/generated-by: OpenShiftWebConsole
   name: iot-psql
   labels:
     app: iot-psql
@@ -38,12 +36,9 @@ spec:
     deploymentconfig: iot-psql
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: iot-psql
         deploymentconfig: iot-psql
-      annotations:
-        openshift.io/generated-by: OpenShiftWebConsole
     spec:
       volumes:
         - name: postgresql-data
@@ -75,7 +70,7 @@ spec:
               mountPath: /data
           terminationMessagePolicy: File
           image: >-
-            quay.io/evanshortiss/rhtr-2020-pgsql@sha256:3c305345f9baea89880cec0f6e7ab12d8640d6946a05fc84e45809c988272a90
+            quay.io/evanshortiss/rhtr-2020-pgsql
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst

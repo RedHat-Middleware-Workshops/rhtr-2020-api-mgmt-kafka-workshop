@@ -11,7 +11,6 @@ spec:
     local: false
   tags:
   - annotations:
-      openshift.io/generated-by: OpenShiftWebConsole
       openshift.io/imported-from: quay.io/evanshortiss/rhtr-2020-pgsql
     from:
       kind: DockerImage

@@ -8,9 +8,7 @@ metadata:
     app: iot-sse-server
     app.kubernetes.io/component: iot-sse-server
     app.kubernetes.io/instance: iot-sse-server
-    app.kubernetes.io/name: ""
     app.kubernetes.io/part-of: iot-sse-server
-    app.openshift.io/runtime: ""
     app.openshift.io/runtime-version: latest
   name: iot-sse-server
 spec:

@@ -1,16 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    openshift.io/generated-by: OpenShiftWebConsole
-  creationTimestamp: "2020-09-11T12:02:35Z"
   labels:
     app: iot-sse-server
     app.kubernetes.io/component: iot-sse-server
     app.kubernetes.io/instance: iot-sse-server
-    app.kubernetes.io/name: ""
     app.kubernetes.io/part-of: iot-sse-server
-    app.openshift.io/runtime: ""
     app.openshift.io/runtime-version: latest
   name: iot-sse-server
 spec:
