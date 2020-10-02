@@ -4,7 +4,7 @@ const log = require('barelog')
 const weightedRandom = require('weighted-random')
 const getTransport = require('./transport')
 const Meter = require('./classes/meter')
-const { SEND_INTERVAL_MS, SEND_COUNT_MIN, SEND_COUNT_MAX} = require('./config')
+const { SEND_INTERVAL_MAX_MS, SEND_COUNT_MIN, SEND_COUNT_MAX} = require('./config')
 
 // These are the states that a meter can be in. They also have a weight
 // assigned that's used to create a distribution of states
@@ -36,7 +36,6 @@ const meterStateWeights = [
 module.exports = async function createGenerator (junctionList, meterList) {
   log('creating data generator')
 
-  let meterIdx = 0
   let junctionIdx = 0
 
   const transport = await getTransport()
@@ -44,7 +43,7 @@ module.exports = async function createGenerator (junctionList, meterList) {
   // Assign random weights to junctions on startup
   assignJunctionWeights(junctionList)
 
-  // Update a batch of junctions every SEND_INTERVAL_MS
+  // Update a batch of junctions every SEND_INTERVAL_MAX_MS
   // setInterval(() => {
   //   const batchSize = getRandomInt(SEND_COUNT_MIN, SEND_COUNT_MAX)
   //   const junctions = junctionList.slice(junctionIdx, junctionIdx + batchSize)
@@ -63,35 +62,27 @@ module.exports = async function createGenerator (junctionList, meterList) {
   //       state.junctionId, state.timestamp, state.counts.ew, state.counts.ns
   //     )
   //   })
-  // }, SEND_INTERVAL_MS)
+  // }, SEND_INTERVAL_MAX_MS)
 
-  // Update a batch of meters every SEND_INTERVAL_MS
-  setInterval(() => {
-    const batchSize = getRandomInt(SEND_COUNT_MIN, SEND_COUNT_MAX)
-    const metersToUpdate = []
 
-    log(`updating ${batchSize} meters in this run`)
+  const sendMeterUpdate = () => {
+    const meterToUpdate = meterList[getRandomInt(0, meterList.length - 1)]
 
-    for (let i = 0; i < batchSize; i++) {
-      // Get $batchSize random meter objects from the meters array
-      metersToUpdate.push(
-        meterList[getRandomInt(0, meterList.length - 1)]
-      )
-    }
+    // Generate a fake update event
+    const { timestamp, status, meterId } = generateStateForMeter(meterToUpdate)
 
-    metersToUpdate.forEach(m => {
-      const { timestamp, status, meterId } = generateStateForMeter(m)
+    // Record the new status on the meter itself
+    meterToUpdate.status = status
 
-      // Record the new statuc on the meter itself
-      m.status = status
+    // Write it to the chosen transport
+    log('sending an update for meter ', meterId)
+    transport.insertMeterUpdate(meterId, timestamp, status)
 
-      // Send the update out with a small random delay between 500ms,
-      // but  before the next send interval tick
-      setTimeout(() => {
-        transport.insertMeterUpdate(meterId, timestamp, status)
-      }, getRandomInt(500, SEND_INTERVAL_MS))
-    })
-  }, SEND_INTERVAL_MS)
+    // Queue the next update to send 500ms to SEND_INTERVAL_MAX_MS from now
+    setTimeout(sendMeterUpdate, getRandomInt(500, SEND_INTERVAL_MAX_MS))
+  }
+
+  sendMeterUpdate()
 }
 
 /**
