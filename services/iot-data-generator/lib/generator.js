@@ -45,45 +45,51 @@ module.exports = async function createGenerator (junctionList, meterList) {
   assignJunctionWeights(junctionList)
 
   // Update a batch of junctions every SEND_INTERVAL_MS
-  setInterval(() => {
-    const batchSize = getRandomInt(SEND_COUNT_MIN, SEND_COUNT_MAX)
-    const junctions = junctionList.slice(junctionIdx, junctionIdx + batchSize)
-    junctionIdx += batchSize
+  // setInterval(() => {
+  //   const batchSize = getRandomInt(SEND_COUNT_MIN, SEND_COUNT_MAX)
+  //   const junctions = junctionList.slice(junctionIdx, junctionIdx + batchSize)
+  //   junctionIdx += batchSize
 
-    log(`updating ${batchSize} junctions in this run`)
+  //   log(`updating ${batchSize} junctions in this run`)
 
-    if (junctionIdx >= junctionList.length) {
-      junctionIdx = 0
-    }
+  //   if (junctionIdx >= junctionList.length) {
+  //     junctionIdx = 0
+  //   }
 
-    junctions.forEach((j) => {
-      const state = generateStateForJunction(j)
+  //   junctions.forEach((j) => {
+  //     const state = generateStateForJunction(j)
 
-      transport.insertJunctionUpdate(
-        state.junctionId, state.timestamp, state.counts.ew, state.counts.ns
-      )
-    })
-  }, SEND_INTERVAL_MS)
+  //     transport.insertJunctionUpdate(
+  //       state.junctionId, state.timestamp, state.counts.ew, state.counts.ns
+  //     )
+  //   })
+  // }, SEND_INTERVAL_MS)
 
   // Update a batch of meters every SEND_INTERVAL_MS
   setInterval(() => {
     const batchSize = getRandomInt(SEND_COUNT_MIN, SEND_COUNT_MAX)
-    const meters = meterList.slice(meterIdx, meterIdx + batchSize)
-    meterIdx += batchSize
+    const metersToUpdate = []
 
     log(`updating ${batchSize} meters in this run`)
 
-    if (meterIdx >= meterList.length) {
-      meterIdx = 0
+    for (let i = 0; i < batchSize; i++) {
+      // Get $batchSize random meter objects from the meters array
+      metersToUpdate.push(
+        meterList[getRandomInt(0, meterList.length - 1)]
+      )
     }
 
-    meters.forEach(m => {
+    metersToUpdate.forEach(m => {
       const { timestamp, status, meterId } = generateStateForMeter(m)
 
-      // For convenient logging. This is not written in the db
+      // Record the new statuc on the meter itself
       m.status = status
 
-      transport.insertMeterUpdate(meterId, timestamp, status)
+      // Send the update out with a small random delay between 500ms,
+      // but  before the next send interval tick
+      setTimeout(() => {
+        transport.insertMeterUpdate(meterId, timestamp, status)
+      }, getRandomInt(500, SEND_INTERVAL_MS))
     })
   }, SEND_INTERVAL_MS)
 }
