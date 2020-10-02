@@ -44,14 +44,14 @@ The end result will be a mobile application that enables a field worker to view 
 
 You're assigned the following tasks:
 
-* Create an AMQ Streams Kafka Cluster and Kafka Topic to ingest IoT data from parking meters.
-* Create an AMQ Streams Kafka HTTP Bridge interface to the Kafka Topic for parking meter data ingestion.
-* Protect the Kafka HTTP Bridge using 3scale API Management.
-* Send meter data to the 3scale endpoint. We'll supply an IoT device simulator to help with this!
-* Deploy a CamelK route that inserts IoT data into a pre-configured Postgres database.
-* Create AMQ Streams Kafka Connect and Kafka Connector instance. These will enable Debezium CDC to propagate Postgres database events to services connected to relevant Kafka Topics.
-* Expose the IoT data in real-time using Quarkus.
-* Protect the Quarkus real-time IoT data service using 3scale API Management.
+* Create an AMQ Streams Kafka Cluster and Kafka Topic(s).
+* Create an AMQ Streams Kafka HTTP Bridge interface to ingest IoT data from parking meters.
+* Secure the Kafka HTTP Bridge using 3scale API Management.
+* Send meter data to the 3scale endpoint (an IoT device simulator and cURL commands are supplied to help with this)
+* Deploy a CamelK integration that inserts IoT data into a pre-configured Postgres database.
+* Create AMQ Streams Kafka Connect and Kafka Connector instance, so Debezium CDC can propagate Postgres database events to services connected to relevant Kafka Topic(s).
+* Process the CDC events using Kafka Streams to create an event stream for a field workforce mobile application.
+* Deploy a Quarkus application that exposes the the Kafka Streams events using server-sent events.
 * View the real-time data on a pre-configured mobile application.
 
 {blank}
@@ -776,16 +776,16 @@ Were you able to view entries in the *city-info.updates.public.meter_update* Top
 [type=verificationFail]
 {standard-fail-text}
 
-[time=15]
+[time=20]
 == Deploy a Quarkus Kafka Streams Application
 
 With CDC up and running, you can use the new Topics to expose live update functionality to Kafka Consumers that are interested in it.
 
 In this lab, a field workforce mobile application will be the Consumer of this information. Using this application, a city engineer could monitor live parking meter data and observe faults in real-time.
 
-However, connecting a mobile application directly to the CDC generated Topics would be inefficient. The generated messages are incredibly verbose, and the application would need to subscribe to both Topics for `meter_update` and `meter` tables to obtain all relevant information. This would result in increased bandwidth and battery usage, and also tightly couple the application to the CDC generated Topic data structures.
+However, connecting a mobile application directly to the CDC generated Topics would be inefficient. The generated messages are incredibly verbose, and the application would need to subscribe to both Topics for `meter_update` and `meter` tables to obtain all relevant information. This would result in increased bandwidth and battery usage, and also tightly couple applications to the CDC generated Topic data structures.
 
-In this section you'll use Kafka Streams to create a new Topic. This Topic will contain simplified JSON Objects with the relevant fields from both CDC Topics that the mobile application can consume.
+In this section you'll use Kafka Streams to create a new Topic. This Topic will contain simplified JSON Objects with the relevant fields from both CDC Topics aggregated, so the mobile application can consume.
 
 As a reminder the following fields will be required by the mobile application to display a real-time feed of IoT events:
 
@@ -795,14 +795,252 @@ As a reminder the following fields will be required by the mobile application to
 * Status (from `meter_update`)
 * Timestamp (from `meter_update`)
 
-=== Deploy the Kafka Streams Quarkus Application
+=== Build the Kafka Streams Quarkus Application
 
 . Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
-. To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Open the *{che-project-name}/services/ladot-kafka-streams/aggregator/src/main/java/org/acme/kafka/streams/TopologyProducer.java* file.
+. This file contains the code that produces stream events containing the information that the mobile application requires. Take note of the following:
+  * Instances of `io.debezium.serde.DebeziumSerdes` are used to deserialise (De) and serialise (Ser) the messages on the CDC Kafka Topics.
+  * The standard `io.quarkus.kafka.client.serialization.JsonbSerde` is used to serialise the aggregated data Objects that the mobile application will consume.
+  * A new `org.apache.kafka.streams.kstream.KTable` is created from the *city-info.updates.public.meter* Topic to simplify lookups using the `meter_id` as a key.
+  * Finally, a stream is created using the *city-info.updates.public.meter_update* Topic. This stream is mapped to use `meter_id` as a key, then joined with the KTable to produce objects containing fields from both.
+. Open the *{che-project-name}/services/ladot-kafka-streams/aggregator/src/main/resources/application.properties* file.
+. Change the bootstrap server values from `localhost:9092` to `iot-cluster-kafka-brokers:9092` (or the *Service* name associated with your brokers found using `oc get services -n {namespace}`) in the *application.properties*.
+. Open a terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
 . Change directory using the `cd {che-project-name}/services/ladot-kafka-streams/aggregator` command.
-. Run the following commands to build and deploy the Kafka Streams service:
+. Run the following commands to build the Kafka Streams service using a source-to-image Build. This will take approximately 1-2 minutes:
 [source,bash,subs="attributes+"]
 ----
+oc login -u {user-username} -p {user-password} https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true
+oc project {user-username}
 mvn clean install
 mvn clean package -Dquarkus.container-image.build=true
 ----
+. The Build logs will be streamed to the terminal, and will show `[INFO] BUILD SUCCESS` when finished.
+. Once the Build has completed, deploy the resulting image using the following command:
+[source,bash,subs="attributes+"]
+----
+oc new-app --image-stream="{user-username}/ladot-cdc-aggregator:1.0-SNAPSHOT"
+----
+. After a few moments the application should scale to a single Pod in the *READY* state. Verify this via the `oc get deployments/ladot-cdc-aggregator` command.
+. You can use a label to change icon displayed for the *Deployment* on the *Topology View*. To display a Quarkus icon for the *ladot-cdc-aggregator* issue this command:
+[source,bash,subs="attributes+"]
+----
+oc label deployments/ladot-cdc-aggregator app.openshift.io/runtime=quarkus
+----
+. Your *Topology View* should look similar to the screenshot below now. Hover over a node and drag the blue arrow that appears to connect services in the *Topology View*.
++
+image:images/screenshots/18-topology-with-streams-app.png[Kafka Streams Application in Topology View]
+
+
+[NOTE]
+====
+You might wonder why the *ladot-cdc-aggregator* is connected to the Kafka Connect instance in the screenshot. Technically speaking the the Kafka Streams application connects to the Kafka Broker(s), but the Topics it subscribes to contain data produced by the Debezium Postgres Kafka Connector.
+====
+
+[type=verification]
+Were you able to build and deploy the Kafka Streams application?
+
+[type=verificationFail]
+{standard-fail-text}
+
+=== Check Kafka Streams Application Logs
+
+The streams application is deployed, but it requires two new topics to be created to function. You can verify this by checking the logs.
+
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
+. Open a terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Issue the following commands to login, and find the name of the Pod for the streams application:
+[source,bash,subs="attributes+"]
+----
+oc login -u {user-username} -p {user-password} https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true
+oc project {user-username}
+oc get pods | grep aggregator
+----
+. The Pod should have a name similar to *ladot-cdc-aggregator-56d4796796-v8hb8*. Use this to get the logs like so:
+[source,bash,subs="attributes+"]
+----
+oc logs $POD_NAME
+----
+. You should see a message similar to __Waiting for topic(s) to be created: [hydrated-meter-events, meter-info-ktable]__ in the logs.
+
+=== Create the Required Kafka Topics
+
+These are the Topics that the `org.apache.kafka.streams.kstream.KTable` and new output stream utilise. Create them by following these steps.
+
+. Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
+. Click *+Add* on the left menu.
+. Click on the *From Catalog* option.
+. Type in `topic` in the search text field and then click on *Kafka Topic*.
+. Click the *Create* button.
+. Create a `Kafka Topic` Custom Resource to define your connector. Replace the contents of the _YAML_ editor with the following code:
++
+[source,yaml,subs="attributes+"]
+----
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: meter-info-ktable
+  labels:
+    strimzi.io/cluster: iot-cluster
+spec:
+  partitions: 10
+  replicas: 1
+  config:
+    retention.ms: 604800000
+    segment.bytes: 1073741824
+----
+. Click the *Create* button.
+. Repeat these same steps, but using the following YAML definition.
+[source,yaml,subs="attributes+"]
+----
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: hydrated-meter-events
+  labels:
+    strimzi.io/cluster: iot-cluster
+spec:
+  partitions: 10
+  replicas: 1
+  config:
+    retention.ms: 604800000
+    segment.bytes: 1073741824
+----
+. If you check the logs for the streaming application Pod after creating these Topics, you will see that it has created the *KTable* mappings using the *meter_id* as a key.
+
+=== Verify the Kafka Streams Application Functionality
+
+. Use the following command to push a Meter update and verify that the Kafka Streams application processes it.
++
+[source,bash,subs="attributes+"]
+----
+curl -X POST \
+{3scale-kafka-staging-api-host}/topics/meters?user_key=YOUR_KEY_HERE \
+-H 'content-type: application/vnd.kafka.json.v2+json' \
+-d '{
+  "records": [
+      {
+        "key": "F6PeB2XQRYG-8EN5yFcrP",
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"status":"unknown"}
+      }
+  ]
+}'
+----
+. A successful response will look similar to this JSON: `{"offsets":[{"partition":1,"offset":12}]}`
+. Viewing the logs for the Kafka Streams application will reveal that a new line has been printed. This line states that a join was performed on the incoming event from the *meter_update* table with the reference data in the *meter* table.
++
+image:images/screenshots/16-meter-join-log.png[Kafka Streams Application Logs for the Join]
+. You can verify that the message has been placed in the *hydrated-meter-events* Topic from a terminal in CodeReady.
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
+. Open a terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Issue the following command to view entries in the *hydrated-meter-events* Topic:
+[source,bash,subs="attributes+"]
+----
+oc exec iot-cluster-kafka-0 -- bash -c \
+"./bin/kafka-console-consumer.sh --topic hydrated-meter-events --bootstrap-server localhost:9092 --from-beginning"
+----
+. An example of resulting output from this command is shown in the screenshot included below.
++
+image:images/screenshots/16-meter-join-log.png[Kafka Streams Application Logs for the Join]
+
+[type=verification]
+Did the `kafka-console-consumer.sh` print messages from the *hydrated-meter-events* Topic to the console?
+
+[type=verificationFail]
+{standard-fail-text}
+
+[time=20]
+== Develop the Mobile Application Frontend
+
+=== Run the Mobile Application in Dev Mode using CodeReady Workspaces
+
+A mobile application developed using link:https://ionicframework.com/[Ionic Framework, window="_blank"] and link:https://reactjs.org/[React, window="_blank"] is included in this lab.
+
+The Ionic Framework allows developers to create cross-platform mobile applications using Angular and React. Vue support is coming soon.
+
+In this section you'll run this application in dev mode in CodeReady Workspaces.
+
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
+. Open a terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Change to the *mobile-app* directory using the `cd {che-project-name}/services/mobile-app` command.
+. Install the application dependencies using npm:
+[source,bash,subs="attributes+"]
+----
+npm install
+----
+. The application requires an URL to be passed via an environment variable at build time. This is the URL for the Quarkus Server-Sent Events application. Start the application using the following commands:
+[source,bash,subs="attributes+"]
+----
+export SSE_APP_ROUTE=$(oc get route/iot-sse-server -o jsonpath={.spec.host})
+
+REACT_APP_SSE_HOSTNAME="http://$SSE_APP_ROUTE" npm start
+----
+. Once the Node.js server starts it will serve the mobile application on port 3000. CodeReady Workspaces will ask if you'd like expose a route to the application. Click *Yes* when prompted.
+. A preview window will open, and the mobile application will render inside this window. If the application does not load on the initial attempt, click the *Refresh* icon at the top of the preview window.
++
+image:images/screenshots/19-mobile-application-preview.png[Mobile Application Preview in CodeReady Workspaces]
+
+[type=verification]
+Did the mobile application render in a CodeReady workspaces preview window?
+
+[type=verificationFail]
+{standard-fail-text}
+
+=== View Real-time Meter Updates in the Mobile Application
+
+You may have already guessed, but to get real-time data showing in the application you're going to use that trusty cURL command used throughout this lab.
+
+. Leave the `npm start` process from the previous section running, or start it again if you stopped it. This will allow the mobile application preview to continue to work.
+. Select the *Meters* tab in the mobile application and verify that it a *Streaming Events* messages is displayed under a blue loading bar. If the bar turns 
+. Open *_another_* terminal window in CodeReady Workspaces. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. In this new terminal issue a meter update using the following cURL command:
++
+[source,bash,subs="attributes+"]
+----
+curl -X POST \
+{3scale-kafka-staging-api-host}/topics/meters?user_key=YOUR_KEY_HERE \
+-H 'content-type: application/vnd.kafka.json.v2+json' \
+-d '{
+  "records": [
+      {
+        "key": "F6PeB2XQRYG-8EN5yFcrP",
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"status":"unknown"}
+      }
+  ]
+}'
+----
+. The mobile application will render the event after a few seconds.
++
+image:images/screenshots/19-mobile-application-preview.png[Mobile Application Preview in CodeReady Workspaces]
+
+[type=verification]
+Did the mobile application display a meter update event?
+
+[type=verificationFail]
+If the mobile application doesn't receive events for a few seconds it will disconnect from the server. Use the reconnect button then send another cURL request. {standard-fail-text}
+
+=== Simulating Hundreds & Thousands of Events
+
+Now that you've verified the application is working, let's simulate some load. An *iot-data-generator* Deployment was included in the *{namespace}* Project for this purpose. 
+
+. Login to the link:{openshift-host}/topology/ns/{namespace}/graph[OpenShift Console, window="_blank"] to view the *{namespace}* project.
+. Find, and select the *iot-data-generator*. The *Details* tab should display a Pod count of zero.
+. Select the *Edit DeploymentConfig* option from the *Actions* dropdown.
++
+image:images/screenshots/21-iot-data-gen-pods.png[IoT Data Generator Pod Count]
+. Navigate to the *Environment* tab in the *Deployment Config Details* screen.
+. Change the *TRANSPORT_MODE* value from `kafka` to `http`.
+. Click *Add Value*, and enter the name *BRIDGE_HTTP_HOST* and value `{3scale-kafka-staging-api-host}/?user_key=YOUR_KEY_HERE`.
+. Click *Save* and return to the link:{openshift-host}/topology/ns/{namespace}/graph[Topology View, window="_blank"].
+. Select the *iot-data-generator* node, and use the up arrow on the *Details* screen to scale it to 1 Pod.
+. Return to the mobile application preview in CodeReady Workspaces and connect to the Meters stream.
+. Meter status events should flow in every couple of seconds thanks to the data generator.
++
+image:images/screenshots/22-iot-generated-meter-event.png[Generated IoT Meter Events Rendered in the Mobile Application]
+
+[type=verification]
+Did the mobile application display a constant stream of meter update events?
+
+[type=verificationFail]
+{standard-fail-text}
