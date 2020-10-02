@@ -13,5 +13,8 @@ module.exports = {
   KAFKA_HOST: get('KAFKA_HOST').default('iot-cluster-kafka-brokers:9092').asString(),
   HTTP_HOST: get('HTTP_HOST').asString(),
   SUPPORTED_TRANSPORTS,
-  TRANSPORT_MODE: get('TRANSPORT_MODE').default('console').asEnum(Object.values(SUPPORTED_TRANSPORTS))
+  TRANSPORT_MODE: get('TRANSPORT_MODE').default('console').asEnum(Object.values(SUPPORTED_TRANSPORTS)),
+  SEND_COUNT_MIN: get('SEND_COUNT_MIN').default('2').asIntPositive(),
+  SEND_COUNT_MAX: get('SEND_COUNT_MIN').default('8').asIntPositive(),
+  SEND_INTERVAL_MS: get('SEND_INTERVAL_MS').default('1500').asIntPositive()
 }

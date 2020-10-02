@@ -4,10 +4,7 @@ const log = require('barelog')
 const weightedRandom = require('weighted-random')
 const getTransport = require('./transport')
 const Meter = require('./classes/meter')
-
-const SEND_INTERVAL_MS = 10 * 1000
-const SEND_COUNT_MIN = 50
-const SEND_COUNT_MAX = 100
+const { SEND_INTERVAL_MS, SEND_COUNT_MIN, SEND_COUNT_MAX} = require('./config')
 
 // These are the states that a meter can be in. They also have a weight
 // assigned that's used to create a distribution of states
