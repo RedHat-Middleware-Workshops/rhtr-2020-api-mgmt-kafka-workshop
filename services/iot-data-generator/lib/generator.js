@@ -75,7 +75,7 @@ module.exports = async function createGenerator (junctionList, meterList) {
     meterToUpdate.status = status
 
     // Write it to the chosen transport
-    log('sending an update for meter ', meterId)
+    log('sending an update for meter:', meterId)
     transport.insertMeterUpdate(meterId, timestamp, status)
 
     // Queue the next update to send 500ms to SEND_INTERVAL_MAX_MS from now
