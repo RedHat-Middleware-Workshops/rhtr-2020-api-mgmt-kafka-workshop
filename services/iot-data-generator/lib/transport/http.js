@@ -2,16 +2,16 @@
 
 const got = require('got')
 const log = require('barelog')
-const { HTTP_HOST } = require('../config')
+const { BRIDGE_HTTP_HOST } = require('../config')
 
 module.exports = function getKafkaTransport() {
   return new Promise((resolve) => {
-    if (!HTTP_HOST) {
-      log('TRANSPORT_MODE is set to use "http", but the HTTP_HOST environment variable is missing. Please set it. For example "https://api.acme.com/"')
+    if (!BRIDGE_HTTP_HOST) {
+      log('TRANSPORT_MODE is set to use "http", but the BRIDGE_HTTP_HOST environment variable is missing. Please set it. For example "https://api.acme.com/"')
       process.exit(1)
     }
 
-    log('creating http transport using host:', HTTP_HOST)
+    log('creating http transport using host:', BRIDGE_HTTP_HOST)
 
     /**
      * Creates a POST body compliant with the Kafka HTTP Bridge format.
@@ -43,7 +43,7 @@ module.exports = function getKafkaTransport() {
           status
         })
 
-        const u = new URL(HTTP_HOST)
+        const u = new URL(BRIDGE_HTTP_HOST)
         // Set URL outside constructor to preserve
         // possible querystring params from env
         u.pathname = '/topics/meters'
@@ -74,7 +74,7 @@ module.exports = function getKafkaTransport() {
           timestamp
         })
 
-        const u = new URL(HTTP_HOST)
+        const u = new URL(BRIDGE_HTTP_HOST)
         // Set URL outside constructor to preserve
         // possible querystring params from env
         u.pathname = '/topics/junctions'
