@@ -97,7 +97,7 @@ const Meters: React.FC = () => {
 
       // Append data to our dataset, and limit dataset length
       events.unshift(data)
-      events.slice(0, 20)
+      events.splice(20)
 
       setEvents([...events])
     };
