@@ -71,7 +71,10 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
           <p>
             A Google Maps view can be rendered here. To enable the map view,
             visit the{' '}
-            <a href="https://console.developers.google.com">
+            <a
+              className="underline text-blue-700"
+              href="https://console.developers.google.com"
+            >
               Google Developer Console
             </a>{' '}
             and create a valid API Key with Google Maps enabled.
@@ -81,6 +84,14 @@ const MeterDetailView: React.FC<RouteMatchParams> = (props) => {
             Once you have a valid API Key, add it to the BuildConfig for this
             application with the name GOOGLE_MAPS_API_KEY and run a new build.
           </p>
+          <br />
+          <p>For example:</p>
+          <br />
+          <pre>
+            oc set env bc/sensor-management-ui
+            GOOGLE_MAPS_API_KEY='an-api-key-goes-here'
+          </pre>
+          <pre>oc start-build bc/sensor-management-ui</pre>
         </div>
       );
     } else {
