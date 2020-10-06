@@ -11,10 +11,20 @@ This repository contains two applications:
 
 ## Building
 
+### For JVM Mode
+
 To build the _producer_ and _aggregator_ applications, run:
 
 ```bash
 mvn clean install
+```
+
+### For Native Deployment
+
+```bash
+cd aggregator
+mvn package -Pnative -Dquarkus.native.container-build=true
+docker build -f src/main/docker/Dockerfile.native -t quay.io/evanshortiss/rhtr-2020-quarkus-streams .
 ```
 
 ## Running
