@@ -47,7 +47,7 @@ You can compile the application into a native binary to run in Docker using:
 mvn package -Pnative -Dquarkus.native.container-build=true
 docker build -f src/main/docker/Dockerfile.native -t quay.io/evanshortiss/rhtr-2020-quarkus-sse .
 
-docker run -i --rm -p 8081:8081 quay.io/evanshortiss/rhtr-2020-quarkus-sse
+docker run -i --rm -p 8080:8080 quay.io/evanshortiss/rhtr-2020-quarkus-sse
 ```
 
 Or to run natively on your host machine:

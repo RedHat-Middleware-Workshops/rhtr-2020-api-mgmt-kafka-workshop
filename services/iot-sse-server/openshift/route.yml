@@ -13,7 +13,7 @@ metadata:
   name: iot-sse-server
 spec:
   port:
-    targetPort: 8081-tcp
+    targetPort: 8080-tcp
   tls:
     insecureEdgeTerminationPolicy: Redirect
     termination: edge
