@@ -16,20 +16,16 @@ Use the following environment variables:
 * KAFKA_BOOTSTRAP_SERVERS (default: localhost:9092)
 * METERS_TOPIC_NAME (default: hydrated-meter-events) - Topic to read meter data from
 * JUNCTIONS_TOPIC_NAME (default: hydrated-junction-events) - Topic to read junction data from
-* GENERATOR_METERS_ENABLED (default: false) - Set to true in dev mode to generate dummy data for topics
-* GENERATOR_JUNCTIONS_ENABLED (default: false) - Set to true in dev mode to generate dummy data for topics
 
 ## Local Development
 
 The application can be started using:
 
 ```
-// If these are set to true, then dummy events will be generated.
-// Tese are only only generated in dev mode
-GENERATOR_METERS_ENABLED=true GENERATOR_JUNCTIONS_ENABLED=true mvn quarkus:dev
+mvn quarkus:dev
 ```
 
-Then, open your browser to `http://localhost:8080/meters.html`, and you should see a JSON data.
+Then, open your browser to `http://localhost:8080/meters.html`, and you should see a JSON data if it is being written to the `hydrated-meter-events` Kafka Topic.
 
 ## Deploy on OpenShift
 
