@@ -391,7 +391,9 @@ Here's a quick overview of those terms:
 === API Management Login
 
 . Open the link:{3scale-url}[3scale Login Page, window="_blank"] and log in with your username and password.
-. The main Dashboard should be displayed.
+. The main Dashboard should be displayed. It will look similar to this screenshot:
++
+image:images/screenshots/25-3scale-dashboard.png[3scale Dashboard]
 
 {blank}
 
@@ -427,7 +429,9 @@ Can you see the 3scale API Management dashboard and navigate the main menu?
 {3scale-kafka-plan-name}
 ----
 . Leave the other fields with their default values.
-. Select *Create Application Plan*. You will be redirected to the *Application Plans* screen.
+. Select *Create Application Plan*. You will be redirected to the *Application Plans* screen as shown in the following screenshot.
++
+image:images/screenshots/26-application-plans.png[3scale Application Plans]
 . Select the *Publish* link, beside your plan list item, to publish the Plan.
 
 {blank}
@@ -446,7 +450,9 @@ Can you see the 3scale API Management dashboard and navigate the main menu?
 ----
 . Click *Create Application*.
 . You'll be redirected to the *{3scale-kafka-app-name}* screen. The User Key (API Key) displayed here.
-. Change the API Key value to by clicking the edit button that looks like a green pencil. Enter the value `{3scale-api-key}` and click *Set Custom Key*.
+. Change the API Key value to by clicking the edit button that looks like a green pencil. Enter the value `{3scale-api-key}` and click *Set Custom Key*. The result will resemble this screenshot.
++
+image:images/screenshots/27-3scale-application-key.png[3scale Application Key]
 
 === Creating a Backend
 
@@ -476,7 +482,9 @@ A *Backend* defines the backend service(s) you wish to protect and make availabl
 .. Select *POST* for the *Verb*.
 .. Enter `/topics/meters` in the *Pattern* field.
 .. Leave the other fields with their default values.
-.. Click *Create Mapping* rule.
+.. Click *Create Mapping* rule. The result will resemble the following screenshot.
++
+image:images/screenshots/28-3scale-mappings.png[3scale Backend Mapping Rules]
 
 === Configure and Deploy the API to Staging
 
