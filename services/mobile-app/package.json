@@ -25,7 +25,7 @@
     "typescript": "3.8.3"
   },
   "scripts": {
-    "start": "REACT_APP_SSE_HOSTNAME='http://localhost:8080' react-scripts start",
+    "start": "REACT_APP_SSE_HOSTNAME=${REACT_APP_SSE_HOSTNAME:-http://localhost:8080} react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
