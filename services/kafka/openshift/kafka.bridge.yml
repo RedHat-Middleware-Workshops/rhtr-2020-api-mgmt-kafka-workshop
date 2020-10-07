@@ -1,7 +1,7 @@
 apiVersion: kafka.strimzi.io/v1alpha1
 kind: KafkaBridge
 metadata:
-  name: iot-cluster-http
+  name: iot-cluster-kafka
 spec:
   tls:
     trustedCertificates:
@@ -11,4 +11,3 @@ spec:
   http:
     port: 8080
   replicas: 1
-
