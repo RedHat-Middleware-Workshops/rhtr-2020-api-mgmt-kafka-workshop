@@ -2,10 +2,11 @@
 
 :standard-fail-text: Verify that you followed all the steps. If you continue to have issues, contact a workshop assistant.
 :namespace: {user-username}
+:user-password: openshift
 
 // Shared service URLS
 :codeready-url: http://che-che.{openshift-app-host}/
-:3scale-url: http://3scale-admin.{openshift-app-host}/
+:3scale-url: https://{user-username}-admin.{openshift-app-host}/
 
 // Che workspace variables
 :che-project-name: KafkaIoT
@@ -17,12 +18,14 @@
 :kafka-bridge-service-url: http://iot-cluster-kafka-bridge-service.{namespace}:8080
 
 // 3scale parking meters kafka bridge properties
+:3scale-api-key: kafka-api-key
+:3scale-kafka-url: kafka-service
 :3scale-kafka-base-name: kafka-service
 :3scale-kafka-api-name: {3scale-kafka-base-name}-api
 :3scale-kafka-app-name: {3scale-kafka-base-name}-app
 :3scale-kafka-backend-name: {3scale-kafka-base-name}-api-backend
 :3scale-kafka-plan-name: {3scale-kafka-base-name}-plan
-:3scale-kafka-staging-api-host: https://{user-username}-kafka-api-staging.{openshift-app-host}:443
+:3scale-kafka-staging-api-host: https://{user-username}-kafka-api-staging.{openshift-app-host}:443/
 
 = Red Hat Tech Ready 2020 IoT Lab
 
@@ -113,15 +116,15 @@ In CodeReady Workspaces changes to files are auto-saved every few seconds, so yo
 === Login to CodeReady Workspaces
 
 . To get started go to the link:{codeready-url}[CodeReady console, window="_blank"] and log in using your username and password credentials.
-. You will need to _Authorize Access_ so CodeReady can access your permissions and manage your session. Click on *Allow selected permissions*.
+. You may need to _Authorize Access_ so CodeReady can access your permissions and manage your session. Click on *Allow selected permissions* if prompted.
 
 
 === Start a CodeReady workspace
 
 . Once you have logged in and authorized access to your user account, you will land in your personal CodeReady dashboard. 
-. Click on the workspace with the name starting with `integration-iot-lab-` on the left menu bar under *RECENT WORKSPACES*.
+. Click on the workspace with the name starting with `kafka-iot-{u  ser-username}` on the left menu bar under *RECENT WORKSPACES*.
 . This will start an instance of the workspace. Please wait a few moments while it downloads the required container images and configuration setup.
-. The first time it’s run, it will git clone the required projects for this workshop. After a minute or two, you’ll be placed in the workspace. Close the initial welcome and README tabs then click on the Explorer button on the left side bar.
+. The first time it’s run, it will `git clone` the required project files for this workshop. After a minute or two, you’ll be placed in the workspace. Close the initial welcome and README tabs then click on the Explorer button on the left side bar.
 
 [NOTE]
 ====
@@ -130,8 +133,8 @@ This IDE is based on *Eclipse Che*, which is in turn is based on Microsoft VS Co
 You can close the _Problems_ and _Output_ views to clear space.
 ====
 
-. The projects explorer will show you a folder with the required projects. Expand the folders to reveal the projects we cloned from a git repository.
-. During the workshop we will need to introduce commands for both the OpenShift and other Command Line Interfaces (CLI) tools. For that we will need to start a terminal window _inside_ one of the containers from the developer workspace. To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. The project explorer will show you a list of folders. Expand the folder named *{che-project-name}* to reveal the services we cloned from a git repository.
+. During the workshop we will need to introduce commands for both OpenShift, and other Command Line Interface (CLI) tools. For that we will need to start a terminal window _inside_ one of the containers from the developer workspace. To open the terminal window, click on the _My Workspace_ button (it looks like a cube) on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . This will deploy the terminal window in the bottom of the screen. This terminal is attached to the running CodeReady container and is also running on OpenShift. This is the place where you will issue most of the commands from this workshop.
 
 === Login into the OpenShift cluster via the CLI
@@ -150,10 +153,10 @@ Login successful.
 
 You have access to the following projects and can switch between them with 'oc project <projectname>':
 
-  * user1
-    user1-che
-    user1-rhtr-0605
-    user1-shared-475f
+  * {user-username}
+    {user-username}-che
+    {user-username}-rhtr-0605
+    {user-username}-shared-475f
 ----
 
 . Most of the work will be deploy to your own `{namespace}` project namespace, so be sure to have it as a _working_ project by executing the following command:
@@ -183,9 +186,9 @@ Some services for this lab were provisioned ahead of time to provide a streamlin
 +
 image:images/screenshots/00-initial-project-topology.png[Initial Project Topology]
 . The services displayed are as follows:
-    * A Postgres database containing reference data for Parking Meters and Traffic Junctions. This database has the necessary Debezium CDC extensions configured.
+    * A Postgres database containing reference data for Parking Meters and Traffic Junctions. This database has the Debezium CDC extensions pre-configured to simplify this workshop.
     * A GraphQL API built using Node.js and link:https://graphback.dev[Graphback, window="_blank"]. This provides access to Meter and Junction data stored in Postgres.
-    * An NGINX container that serves a web application built using React.
+    * An NGINX container that serves a web application built using React. This web application communicates with the GraphQL API.
 . Click on the NGINX node in the Topology View.
 . Select the the *Resources* tab, and click the URL listed under *Routes*. It will look similar to `https://sensor-management-ui-{namespace}.apps.$CLUSTER_URL`.
 . The link should render a web application with a title *LA Department of Transport* similar to the one shown below.
@@ -209,10 +212,10 @@ Were you able to view the Meters list in the web application? If so, you are rea
 [time=15]
 == Setup a Kafka Cluster, Topics, and HTTP Bridge
 
-The OpenShift 4 cluster that this lab is being run on has been pre-configured with the *Red Hat Integration - AMQ Streams* operator. Documentation for AMQ Streams on OpenShift can be found at link:{https://access.redhat.com/documentation/en-us/red_hat_amq/7.7/html-single/using_amq_streams_on_openshift/index}[this link, window="_blank"].
+The OpenShift 4 cluster that this lab is being run on has had the *Red Hat Integration - AMQ Streams* operator pre-installed. You'll be using the link:{https://docs.openshift.com/container-platform/4.5/operators/crds/crd-extending-api-with-crds.html#crd-creating-custom-resources-from-file_crd-extending-api-with-crds}[Custom Resources, window="_blank"] provided by the operator to create a Kafka Cluster. Documentation for AMQ Streams on OpenShift can be found at link:{https://access.redhat.com/documentation/en-us/red_hat_amq/7.7/html-single/using_amq_streams_on_openshift/index}[this link, window="_blank"].
 
 === Create the Kafka Cluster 
-A Kafka Cluster is created by providing OpenShift with an instance of a *Kafka* link:{https://docs.openshift.com/container-platform/4.5/operators/crds/crd-extending-api-with-crds.html#crd-creating-custom-resources-from-file_crd-extending-api-with-crds}[Custom Resource, window="_blank"] via the `oc apply` command. The AMQ Streams operator will create the Kafka Cluster based on the parameters specified in the CR.
+A Kafka Cluster is created by providing OpenShift with an instance of a *Kafka* link:{https://docs.openshift.com/container-platform/4.5/operators/crds/crd-extending-api-with-crds.html#crd-creating-custom-resources-from-file_crd-extending-api-with-crds}[Custom Resource, window="_blank"] via the `oc apply` command, or via the OpenShift Developer Catalog UI. The AMQ Streams operator will create the Kafka Cluster based on the parameters specified in the CR.
 
 . Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
 . Click *+Add* on the left menu.
@@ -221,7 +224,10 @@ A Kafka Cluster is created by providing OpenShift with an instance of a *Kafka* 
 +
 image:images/screenshots/09-kafka-add-resources.png[Available Operator Backed Kafka Resources]
 . Click on the *Kafka* item, review the details, then click the *Create* button.
-. Create a `Kafka` Custom Resource to define your connector. Replace the contents of the _YAML_ editor with the following code:
+. If the *Form View* is displayed, change to the the *YAML View*. It should look similar to this screenshot:
++
+image:images/screenshots/23-kafka-yaml-view.png[Kafka Add Resources YAML View]
+. Replace the contents of the _YAML_ editor with the following code:
 +
 [source,yaml,subs="attributes+"]
 ----
@@ -251,11 +257,11 @@ spec:
     topicOperator: {}
     userOperator: {}
 ----
-. Click the *Create* button. You should be returned to the link:{user-topology-url}[Topology View, window="_blank"] automatically.
+. Click the *Create* button to create a `Kafka` Custom Resource to define your cluster. You should be returned to the link:{user-topology-url}[Topology View, window="_blank"] automatically.
 
 {blank}
 
-After a few moments the Kafka Cluster will be displayed. It is represented in the Topology View as a application group named *strimzi-iot-cluster*.
+After a few moments the Kafka Cluster will be displayed. It is represented in the Topology View as an application group named *strimzi-iot-cluster*.
 
 image:images/screenshots/04-topology-with-kafka-cluster.png[Topology View with Kafka Cluster]
 
@@ -293,12 +299,12 @@ The AMQ Streams operator will automatically create the Topic in the Kafka Cluste
 
 Now that a topic has been created, you'll want to start placing data into it! This can be achieved by deploying an application that acts as a Producer and writes messages to a Topic. 
 
-The included *iot-data-generator* is a Producer, but you won't be using it just yet. First, you'll deploy a Kafka Bridge that exposes a HTTP endpoint so we can send messages to the *meters* Topic via HTTP.
+The included *iot-data-generator* is a Producer, but you won't be using it just yet. First, you'll deploy a Kafka Bridge that exposes a HTTP endpoint so you can send messages to the *meters* Topic using HTTP.
 
 . Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
 . Click *+Add* on the left menu.
 . Click on the *From Catalog* option.
-. Type in `kafka` in the search text field and then click on *Kafka Topic*.
+. Type in `kafka` in the search text field and then click on *Kafka Bridge*.
 . Click the *Create* button.
 . Create a `Kafka Bridge` Custom Resource to define your connector. Replace the contents of the _YAML_ editor with the following code:
 +
@@ -328,10 +334,12 @@ image:images/screenshots/05-topology-with-kafka-bridge.png[Topology View with Ka
 
 === Verify the Cluster, Topics, and Bridge
 
-Now that the bridge has been created, you can use it place data into the *meters* Topic. By default, the Kafka HTTP Bridge is does not expose an OpenShift Route so it cannot be accessed from outside the cluster. Sending a POST request using cURL from the terminal in CodeReady Workspaces will work, since it is running within the OpenShift cluster and can access other services running in the cluster.
+Now that the bridge has been created, you can use it place data into the *meters* Topic. 
 
-. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
-. To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+By default, the Kafka HTTP Bridge is does not expose an OpenShift Route so it cannot be accessed from outside the cluster. To test the Bridge you'll send a POST request using cURL from the terminal in CodeReady Workspaces; this works since the request will originate from within the OpenShift cluster.
+
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
+. To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . To find the hostname of the Kafka HTTP Bridge run the `oc get svc -n {namespace}` command. It should list the `iot-cluster-kafka-bridge-service` and the port it is listening on.
 . Run a `date +%s` command to get a valid timestamp for the request payload.
 . From the terminal, run the following command to place a message into the *meters* Topic. Replace the `timestamp` value with the output from the previous `date` command:
@@ -350,7 +358,7 @@ curl -X POST \
   ]
 }'
 ----
-. A successful response will look similar to this JSON: `{"offsets":[{"partition":1,"offset":0}]}`
+. A successful response will be similar to this JSON sample: `{"offsets":[{"partition":0,"offset":0}]}`. This indicates that the message was successfully written to the given partition at the given offset.
 
 [type=verification]
 Did you receive a JSON response from the Kafka HTTP Bridge that is similar to the provided example?
@@ -382,7 +390,7 @@ Here's a quick overview of those terms:
 
 === API Management Login
 
-. Open the link:{3scale-kafka-url}[3scale Login Page, window="_blank"] and log in with your username and password.
+. Open the link:{3scale-url}[3scale Login Page, window="_blank"] and log in with your username and password.
 . The main Dashboard should be displayed.
 
 {blank}
@@ -395,7 +403,7 @@ Can you see the 3scale API Management dashboard and navigate the main menu?
 
 === Creating a New Product
 
-. From the *Dashboard*, select the *New Product* item.
+. From the *Dashboard*, select the *New Product* item on the *Products* tab.
 . Select the *Define Manually* option.
 . Enter the following as the *Name* and *System name*:
 +
@@ -427,7 +435,7 @@ Can you see the 3scale API Management dashboard and navigate the main menu?
 === Creating an Application
 . Select *Audience* from the top navigation bar dropdown.
 . Select the *Developer* Account to open the *Account Summary* page.
-. Select the *(num) Application* item from the breadcrumb at the top of the screen to view Applications.
+. Select the *(num) Application* (e.g *1 Application*) item, from the breadcrumb at the top of the screen to view Applications.
 . Click the *Create Application* button in the top right.
 . Select the *{3scale-kafka-plan-name}* Plan within the *{3scale-kafka-api-name}* section in the *Application plan* dropdown.
 . Enter the following for *Name* and *Description*:
@@ -437,10 +445,12 @@ Can you see the 3scale API Management dashboard and navigate the main menu?
 {3scale-kafka-app-name}
 ----
 . Click *Create Application*.
+. You'll be redirected to the *{3scale-kafka-app-name}* screen. The User Key (API Key) displayed here.
+. Change the API Key value to by clicking the edit button that looks like a green pencil. Enter the value `{3scale-api-key}` and click *Set Custom Key*.
 
 === Creating a Backend
 
-A *Backend* defines the backend service(s) you wish to protect and make available via *Product(s)*. This includes rules whitelisting HTTP verbs and paths.
+A *Backend* defines the backend service(s) you wish to protect and make available via *Product(s)*. Part of defining a Product includes rules whitelisting HTTP verbs and paths that you will make accessible.
 
 . Verify that *Dashboard* is selected in the top navigation menu of 3scale API Management.
 . Select *Backends* from the *APIs* section.
@@ -464,7 +474,7 @@ A *Backend* defines the backend service(s) you wish to protect and make availabl
 . Select *Mapping Rules* from the side navigation.
 . Click *Add Mapping Rule* on the *Mapping Rules* screen to create a mapping rule:
 .. Select *POST* for the *Verb*.
-.. Enter */topics/meters* in the *Pattern* field.
+.. Enter `/topics/meters` in the *Pattern* field.
 .. Leave the other fields with their default values.
 .. Click *Create Mapping* rule.
 
@@ -472,9 +482,12 @@ A *Backend* defines the backend service(s) you wish to protect and make availabl
 
 In this section you'll see how the resources created in previous sections are utilised to access the API.
 
-. Ensure that the *{3scale-kafka-api-name}* Product is selected in the top navigation menu of {3Scale-kafka-ProductName}.
+. Ensure that the *Product: {3scale-kafka-api-name}* is selected in the top navigation menu of 3scale API Management.
 . Select *Integration > Settings*:
-.. In the *Staging Public Base URL* field enter `{3scale-kafka-staging-api-host}`.
+.. Verify that *APIcast 3scale managed* si selected.
+.. In the *Staging Public Base URL* field enter `{3scale-kafka-staging-api-host}`. Ensure that no trailing slash is included in the URL.
+.. Verify that *API Key (user_key)* is selected under the *Authentication* heading.
+.. Verify that *Credentials Location* is set to *As query parameters*.
 .. Scroll down and click the *Update Product* button.
 . Select *Integration > Configuration* from the side menu and click *add a Backend and promote this configuration*.
 . In the *Add Backend* screen select your *{3scale-kafka-backend-name}* in the *Backend* field and click *Add to Product*.
@@ -490,15 +503,15 @@ Take special note of the API Key in the `user_key` from the *Example curl for te
 
 === Verify the API Endpoint
 
-. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
-. To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
+. To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . Run a `date +%s` command to get a valid timestamp for the request payload.
 . From the terminal, run the following command to place a message into the *meters* Topic. Replace the `timestamp` value with the output from the previous `date` command:
 +
 [source,bash,subs="attributes+"]
 ----
 curl -X POST \
-{3scale-kafka-staging-api-host}/topics/meters?user_key=YOUR_KEY_HERE \
+{3scale-kafka-staging-api-host}/topics/meters?user_key={3scale-api-key} \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
@@ -509,23 +522,23 @@ curl -X POST \
   ]
 }'
 ----
-. A successful response will look similar to this JSON: `{"offsets":[{"partition":1,"offset":0}]}`
+. A successful response will look similar to this JSON: `{"offsets":[{"partition":0,"offset":1}]}`
 
 [type=verification]
 Were you able to send a payload to the Kafka Topic via the 3scale API Management endpoint?
 
 [type=verificationFail]
-Ensure that the API Key (`user_key`) is defined in the sample Staging cURL command and that you entered the correct URL in the Backend configuration. {standard-fail-text}
+Ensure that the API Key (`user_key`) is defined in the sample Staging cURL command with the correct key. Verify that you entered the correct Kafka Bridge Service URL in the Backend configuration. {standard-fail-text}
 
 [time=15]
 == Deploying a CamelK Integration to Process Topics
 
-At this point you've setup Kafka infrastructure and API Management capabilities to ingest data from IoT devices (Producers). Next, you need to process that data using a Consumer.
+At this point you've setup Kafka infrastructure and API Management capabilities to ingest data from IoT devices (Producers). Next, you'll process that data using a CamelK Integration as a Consumer.
 
-In this section you'll deploy a Consumer that processes the Parking Meter events using CamelK. This Consumer writes the data to the Postgres database for long-term storage.
+This Consumer process Parking Meter events and writes the resulting data to the Postgres database for long-term storage in accordance with city of LA requirements.
 
 === Deployment using the Kamel CLI
-. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
 . Select Terminal > Open Terminal in specific container and select the container that begins with "dil-" (followed by a 5-digit alphanumeric code). Click it and a terminal window should open.
 +
 image:images/screenshots/10-che-kamel-terminal.png[Opening the DIL Container with Kamel Support]
@@ -536,10 +549,16 @@ image:images/screenshots/10-che-kamel-terminal.png[Opening the DIL Container wit
 ----
 oc login -u {user-username} -p {user-password} https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true
 ----
+. Select the *{user-username}* project:
++
+[source,bash,subs="attributes+"]
+----
+`oc project {user-username}`
+----
 . Expand the *{che-project-name}/services/camel-iot-ingestion* folder, and open the *meters.properties* file.
-. Verify that the *kafka.host* and *kafka.port* values are correct. Do this by running `oc get svc -n {namespace}` and finding the corresponding host and ports in the terminal output. Amend the *meters.properties* file if necessary.
+. Verify that the *kafka.host* and *kafka.port* values are correct. Do this by running `oc get svc -n {namespace}` and finding the corresponding host and ports for the Kafka Broker in the terminal output. Amend the *meters.properties* file if necessary.
 . Verify that the *db.username* and *db.password* are referencing the correct values:
-    * Run `oc get secret -n {namespace}` to verify that the *pg-login* secret from the *meters.properties* is listed.
+    * Run `oc get secret -n {namespace}` to verify that the *pg-login* secret referenced by the *meters.properties* is listed.
     * Run `oc get secret/pg-login -n {namespace} -o yaml` to verify that the secret contains the keys referenced in *meters.properties*.
 . Open the *MetersConsumer.java* file. Note that the `dataSource.setUsername` and `dataSource.setPassword` are being set to the values from the *meters.properties* using the `PropertyInject` annotation.
 . Change directory using the `cd {che-project-name}/services/camel-iot-ingestion` command.
@@ -547,7 +566,7 @@ oc login -u {user-username} -p {user-password} https://$KUBERNETES_SERVICE_HOST:
 +
 [source,bash,subs="attributes+"]
 ----
-oc create configmap meters.kafka.props --from-file=meters.properties
+oc create configmap meters.kafka.props --from-file=meters.properties -n {user-username}
 ----
 . The next command will deploy the *MetersConsumer.java* file that implements this integration. Note that command-line flags:
     * Target the correct namespace.
@@ -571,6 +590,14 @@ kamel run MetersConsumer.java \
 
 The *Red Hat Integration - CamelK* operator will start building your integration after a few moments.
 
+{blank}
+
+[type=verification]
+Did the CamelK Integration start? Were the logs free of errors?
+
+[type=verificationFail]
+Verify that the `kamel` command returned no errors, and that the *meters.kafka.props* ConfigMap was created. {standard-fail-text}
+
 === Verify the Integration
 
 After you've executed the `kamel run` command, the operator will create a BuildConfig and Build to deploy the integration. Since this is the initial deployment it will take a few minutes to build and start.
@@ -578,8 +605,10 @@ After you've executed the `kamel run` command, the operator will create a BuildC
 You can run the following commands to view the resources created by the *Red Hat Integration - CamelK* operator to deploy and manage the integration:
 
 . Use `oc get bc -n {namespace}` to list BuildConfigs. The list will contain a BuildConfig starting with "camel".
-. The `oc get builds` command will return a list of Builds. You will be able to find one starting with "camel", e.g "camel-k-kit-btmvls9ki". View the logs using `oc logs`, e.g `oc logs camel-k-kit-btmvls9ki-builder`.
+. The `oc get builds` command will return a list of Builds. You will be able to find one starting with "camel", e.g "camel-k-kit-btmvls9ki".
 . You can also view this information by visiting the link:{openshift-host}/k8s/ns/{namespace}/buildconfigs[BuildConfigs, window="_blank"] screen.
+
+{blank}
 
 Once you're finished exploring these resources, you can monitor the integration:
 
@@ -587,7 +616,7 @@ Once you're finished exploring these resources, you can monitor the integration:
 . A new node containing the a *meters-consumer*  Deployment should be shown. If the Deployment is missing, wait a little longer so the operator can finish building it.
 +
 image:images/screenshots/06-camelk-meters-running.png[CamelK Meters Consumer in Topology View]
-. Click the CamelK node and a details panel will appear on the right.
+. Click the CamelK *meters-consumer* node and a details panel will appear on the right.
 . Select the *Resources* tab inb the details panel, then click *View logs*.
 . The logs should display generic startup information, and references to the Kafka configuration being used. No errors should be displayed.
 . Send a message to the meters topic to verify the integration is working as intended. Use the same cURL command you used previously:
@@ -595,7 +624,7 @@ image:images/screenshots/06-camelk-meters-running.png[CamelK Meters Consumer in 
 [source,bash,subs="attributes+"]
 ----
 curl -X POST \
-{3scale-kafka-staging-api-host}/topics/meters?user_key=YOUR_KEY_HERE \
+{3scale-kafka-staging-api-host}/topics/meters?user_key={3scale-api-key} \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
@@ -612,11 +641,16 @@ image:images/screenshots/07-camelk-success-logs.png[CamelK Meters Consumer Logs]
 . Using the screenshot above as a reference, confirm the JSON you sent via cURL is shown as the Kafka message body. An SQL INSERT statement should also be printed. No errors should be displayed.
 . Next, you'll verify that the INSERT to the database worked as expected. Get started by opening the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
 . Select the *iot-psql* node. A details pane should appear on the right. Select the *Resources* tab, and click the Pod name.
-. Navigate the *Terminal* tab from the *Pod Details* screen and run the following commands to query the database:
+. Navigate the *Terminal* tab from the *Pod Details* screen and run the following command to login to the database:
++
 [source,bash,subs="attributes+"]
 ----
 psql -d $POSTGRES_DB -U $POSTGRES_USER
-
+----
+. Run the following *SELECT* statement:
++
+[source,bash,subs="attributes+"]
+----
 select * from meter_update;
 ----
 . You should see output similar to this screenshot:
@@ -634,9 +668,9 @@ Did you get a successful response from the 3scale API endpoint? Is the CamelK in
 [time=15]
 == Kafka Configuration for Change Data Capture
 
-Now data can flow from IoT devices to Kafka Topics via 3scale API Management. Downstream applications may want to be alerted of the database operations triggered by the integrations you've created.
+The LA Department of Transport are building a mobile application that will enable engineers to see real-time Parking Meter updates.
 
-To facilitate this, you'll setup *change data capture* using Debezium to stream database events to a Kafka Topic via Kafka Connect.
+To facilitate this, you'll setup *change data capture (CDC)* using Debezium and Kafka Connect to stream database events from the *meter_update* table to a Kafka Topic. This will provide a real-time data feed without adding additional load on the database.
 
 === Deploy Kafka Connect
 . The Postgres instance used in this lab has been pre-configured with the Debezium extensions, so you will configure a Kafka Connect to communicate with it.
@@ -715,21 +749,21 @@ image:images/screenshots/13-kafka-psql-connector.png[Logs for Kafka Connector to
 Do the Kafka Connect logs report that the Postgres Connector successfully connected to the Postgres instance?
 
 [type=verificationFail]
-{standard-fail-text}
+It might take 1-2 minutes for the operator to create the Postgres Connector. {standard-fail-text}
 
 === Send a Message to the Meters Topic
 
-To verify the Connector is working as expected you'll want to send a new message to be processed. This will trigger an INSERT to the *meter_update* table that Debezium will capture.
+To verify the Connector is working as expected you'll want to send a new message to be processed. This will trigger an INSERT to the *meter_update* table that Debezium will capture and forward to a corresponding CDC Topic for that database table.
 
-. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
-. To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
+. To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . Run a `date +%s` command to get a valid timestamp for the request payload.
 . From the terminal, run the following command to place a message into the *meters* Topic. Replace the `timestamp` value with the output from the previous `date` command:
 +
 [source,bash,subs="attributes+"]
 ----
 curl -X POST \
-{3scale-kafka-staging-api-host}/topics/meters?user_key=YOUR_KEY_HERE \
+{3scale-kafka-staging-api-host}/topics/meters?user_key={3scale-api-key} \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
@@ -740,17 +774,19 @@ curl -X POST \
   ]
 }'
 ----
-. A successful response will look similar to this JSON: `{"offsets":[{"partition":1,"offset":0}]}`
+. A successful response will look similar to this JSON: `{"offsets":[{"partition":0,"offset":3}]}`
+
+You'll see the result of this cURL request in a subsequent section.
 
 === Examine the Kafka Topics Listing
 
-. Navigate to the link:{openshift-host}/k8s/cluster/projects/{namespace}[Administrator View] for your project.
+. Navigate to the link:{openshift-host}/k8s/cluster/projects/{namespace}[Administrator View, target="_blank"] for your project. If you're seeing the *Developer* view, use the dropdown in the top-left to switch views to *Administrator*.
 . Expand the *Operators* section on the left and select *Installed Operators*.
 . Select the *Red Hat Integration - AMQ Streams* operator. This will display the *Operator Details* screen.
-. Navigate to the *Kafka Topic* tab. You should see the *meters* Topic you created using YAML earlier in this lab, but you should also see Topics with the prefix *city-info.updates*.
+. Navigate to the *Kafka Topic* tab. You should see the *meters* Topic you created using YAML earlier in this lab, but you should also new Topics with the prefix *city-info.updates*. These contain CDC messages.
 +
 image:images/screenshots/14-kafka-topics-list.png[Kafka Topics Listing]
-. Click the Topic that starts with *city-info.updates.public.meter-update*, and is followed by a unique ID. This will load the *KafkaTopic Details* screen.
+. Click the Topic that starts with *city-info.updates.public.meter-update* and is followed by a unique ID. This will load the *KafkaTopic Details* screen.
 . Switch to the *YAML* tab and find the `topicName` field in the YAML. It should have the value `city-info.updates.public.meter_update`. Take note of this since it is required in the next section.
 
 {blank}
@@ -770,7 +806,7 @@ Does the Topics list contain items prefixed with *city-info.updates*, e.g *city-
 ----
 ./bin/kafka-console-consumer.sh --topic city-info.updates.public.meter_update --from-beginning --bootstrap-server localhost:9092
 ----
-. This should print a series of JSON objects representing the INSERT operations that were performed on the *meter_update* table. Running cURL requests to the Kafka HTTP Bridge will produce more JSON objects.
+. This should print a one or more JSON objects representing the INSERT operations that were performed on the *meter_update* table. Running more cURL POST requests to the Kafka HTTP Bridge will produce more JSON objects.
 +
 image:images/screenshots/15-kafka-meter-updates-topic.png[Kafka Meter Update Topic Data]
 
@@ -785,15 +821,11 @@ Were you able to view entries in the *city-info.updates.public.meter_update* Top
 [time=20]
 == Deploy a Quarkus Kafka Streams Application
 
-With CDC up and running, you can use the new Topics to expose live update functionality to Kafka Consumers that are interested in it.
+Connecting a mobile application directly to the CDC generated Topics would be inefficient. The generated messages are incredibly verbose, and the application would need to subscribe to the Topics for `meter_update` and `meter` tables to obtain all relevant information to build a meaningful UI. This would result in increased bandwidth and battery usage, and also tightly couple applications to the CDC generated Topic data structures.
 
-In this lab, a field workforce mobile application will be the Consumer of this information. Using this application, a city engineer could monitor live parking meter data and observe faults in real-time.
+In this section you'll use Kafka Streams to create a new Topic. This Topic will be the result of a *join*, and will contain simplified JSON Objects with just the relevant fields from the messages in both CDC Topics.
 
-However, connecting a mobile application directly to the CDC generated Topics would be inefficient. The generated messages are incredibly verbose, and the application would need to subscribe to both Topics for `meter_update` and `meter` tables to obtain all relevant information. This would result in increased bandwidth and battery usage, and also tightly couple applications to the CDC generated Topic data structures.
-
-In this section you'll use Kafka Streams to create a new Topic. This Topic will contain simplified JSON Objects with the relevant fields from both CDC Topics aggregated, so the mobile application can consume.
-
-As a reminder the following fields will be required by the mobile application to display a real-time feed of IoT events:
+The following fields will be required by the mobile application to display a meaningful real-time feed of IoT events:
 
 * Address (from `meter`)
 * Latitude (from `meter`)
@@ -803,38 +835,50 @@ As a reminder the following fields will be required by the mobile application to
 
 === Build the Kafka Streams Quarkus Application
 
-. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
 . Open the *{che-project-name}/services/ladot-kafka-streams/aggregator/src/main/java/org/acme/kafka/streams/TopologyProducer.java* file.
 . This file contains the code that produces stream events containing the information that the mobile application requires. Take note of the following:
-  * Instances of `io.debezium.serde.DebeziumSerdes` are used to deserialise (De) and serialise (Ser) the messages on the CDC Kafka Topics.
+  * Instances of `io.debezium.serde.DebeziumSerdes` are used to deserialise (De) and serialise (Ser) the messages from/to the CDC Kafka Topics.
   * The standard `io.quarkus.kafka.client.serialization.JsonbSerde` is used to serialise the aggregated data Objects that the mobile application will consume.
-  * A new `org.apache.kafka.streams.kstream.KTable` is created from the *city-info.updates.public.meter* Topic to simplify lookups using the `meter_id` as a key.
+  * A new `org.apache.kafka.streams.kstream.KTable` is created from the *city-info.updates.public.meter* and modified using *map* to simplify lookups using the `meter_id` as a key.
   * Finally, a stream is created using the *city-info.updates.public.meter_update* Topic. This stream is mapped to use `meter_id` as a key, then joined with the KTable to produce objects containing fields from both.
 . Open the *{che-project-name}/services/ladot-kafka-streams/aggregator/src/main/resources/application.properties* file.
 . Change the bootstrap server values from `localhost:9092` to `iot-cluster-kafka-brokers:9092` (or the *Service* name associated with your brokers found using `oc get services -n {namespace}`) in the *application.properties*.
-. Open a terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
-. Change directory using the `cd {che-project-name}/services/ladot-kafka-streams/aggregator` command.
-. Run the following commands to build the Kafka Streams service using a source-to-image Build. This will take approximately 1-2 minutes:
+. Open an *openshift-tools* terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
+. Run the following commands to build the Kafka Streams service using a Source-to-Image (s2i) Build. This will take approximately 1-2 minutes:
++
 [source,bash,subs="attributes+"]
 ----
 oc login -u {user-username} -p {user-password} https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true
 oc project {user-username}
+cd {che-project-name}/services/ladot-kafka-streams/aggregator
 mvn clean install
 mvn clean package -Dquarkus.container-image.build=true
 ----
-. The Build logs will be streamed to the terminal, and will show `[INFO] BUILD SUCCESS` when finished.
+. The Build logs will be streamed to the terminal. You know the build is finished when `[INFO] BUILD SUCCESS` is displayed and the command exits.
+
+[type=verification]
+Were you able to build the application on OpenShift using Source-to-Image?
+
+[type=verificationFail]
+{standard-fail-text}
+
+=== Deploy the Kafka Streams Quarkus Application
+
 . Once the Build has completed, deploy the resulting image using the following command:
++
 [source,bash,subs="attributes+"]
 ----
 oc new-app --image-stream="{user-username}/ladot-cdc-aggregator:1.0-SNAPSHOT"
 ----
 . After a few moments the application should scale to a single Pod in the *READY* state. Verify this via the `oc get deployments/ladot-cdc-aggregator` command.
 . You can use a label to change icon displayed for the *Deployment* on the *Topology View*. To display a Quarkus icon for the *ladot-cdc-aggregator* issue this command:
++
 [source,bash,subs="attributes+"]
 ----
-oc label deployments/ladot-cdc-aggregator app.openshift.io/runtime=quarkus
+oc label deploymentconfig/ladot-cdc-aggregator app.openshift.io/runtime=quarkus
 ----
-. Your *Topology View* should look similar to the screenshot below now. Hover over a node and drag the blue arrow that appears to connect services in the *Topology View*.
+. Your link:{user-topology-url}[Topology View, window="_blank"] should look similar to the screenshot below now. Hover over a node and drag the blue arrow that appears to connect services in the *Topology View*.
 +
 image:images/screenshots/18-topology-with-streams-app.png[Kafka Streams Application in Topology View]
 
@@ -845,7 +889,7 @@ You might wonder why the *ladot-cdc-aggregator* is connected to the Kafka Connec
 ====
 
 [type=verification]
-Were you able to build and deploy the Kafka Streams application?
+Were you able to deploy the Kafka Streams application?
 
 [type=verificationFail]
 {standard-fail-text}
@@ -854,21 +898,23 @@ Were you able to build and deploy the Kafka Streams application?
 
 The streams application is deployed, but it requires two new topics to be created to function. You can verify this by checking the logs.
 
-. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
-. Open a terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
+. Open a terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . Issue the following commands to login, and find the name of the Pod for the streams application:
++
 [source,bash,subs="attributes+"]
 ----
 oc login -u {user-username} -p {user-password} https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true
 oc project {user-username}
 oc get pods | grep aggregator
 ----
-. The Pod should have a name similar to *ladot-cdc-aggregator-56d4796796-v8hb8*. Use this to get the logs like so:
+. The Pod should have a name similar to *ladot-cdc-aggregator-56d4796796-v8hb8*. Use this command to tail the logs:
++
 [source,bash,subs="attributes+"]
 ----
-oc logs $POD_NAME
+oc logs $POD_NAME -f
 ----
-. You should see a message similar to __Waiting for topic(s) to be created: [hydrated-meter-events, meter-info-ktable]__ in the logs.
+. You should see a message similar to __Waiting for topic(s) to be created: [hydrated-meter-events, meter-info-ktable]__ in the logs. You should also see many _mapping meter info_ statements that are logged as the `KTable` initialises.
 
 === Create the Required Kafka Topics
 
@@ -898,6 +944,7 @@ spec:
 ----
 . Click the *Create* button.
 . Repeat these same steps, but using the following YAML definition.
++
 [source,yaml,subs="attributes+"]
 ----
 apiVersion: kafka.strimzi.io/v1beta1
@@ -922,7 +969,7 @@ spec:
 [source,bash,subs="attributes+"]
 ----
 curl -X POST \
-{3scale-kafka-staging-api-host}/topics/meters?user_key=YOUR_KEY_HERE \
+{3scale-kafka-staging-api-host}/topics/meters?user_key={3scale-api-key} \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
@@ -933,18 +980,18 @@ curl -X POST \
   ]
 }'
 ----
-. A successful response will look similar to this JSON: `{"offsets":[{"partition":1,"offset":12}]}`
+. A successful response will look similar to this JSON: `{"offsets":[{"partition":0,"offset":5}]}`
 . Viewing the logs for the Kafka Streams application will reveal that a new line has been printed. This line states that a join was performed on the incoming event from the *meter_update* table with the reference data in the *meter* table.
 +
 image:images/screenshots/16-meter-join-log.png[Kafka Streams Application Logs for the Join]
 . You can verify that the message has been placed in the *hydrated-meter-events* Topic from a terminal in CodeReady.
-. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
-. Open a terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
+. Open a terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . Issue the following command to view entries in the *hydrated-meter-events* Topic:
++
 [source,bash,subs="attributes+"]
 ----
-oc exec iot-cluster-kafka-0 -- bash -c \
-"./bin/kafka-console-consumer.sh --topic hydrated-meter-events --bootstrap-server localhost:9092 --from-beginning"
+oc exec iot-cluster-kafka-0 -- bash -c "./bin/kafka-console-consumer.sh --topic hydrated-meter-events --bootstrap-server localhost:9092 --from-beginning"
 ----
 . An example of resulting output from this command is shown in the screenshot included below.
 +
@@ -956,34 +1003,94 @@ Did the `kafka-console-consumer.sh` print messages from the *hydrated-meter-even
 [type=verificationFail]
 {standard-fail-text}
 
+=== Simulating Hundreds & Thousands of Events
+
+Now that you've verified the integrations are working, you can simulate some real load. An *iot-data-generator* Deployment was included in the your Project for this purpose. 
+
+. Login to the link:{openshift-host}/topology/ns/{namespace}/graph[OpenShift Console, window="_blank"] to view the *{namespace}* project.
+. Find, and select the *iot-data-generator*. The *Details* tab should display a Pod count of zero.
+. Select the *Edit DeploymentConfig* option from the *Actions* dropdown.
++
+image:images/screenshots/21-iot-data-gen-pods.png[IoT Data Generator Pod Count]
+. Navigate to the *Environment* tab in the *Deployment Config Details* screen.
+. Change the *TRANSPORT_MODE* value from `kafka` to `http`.
+. Click *Add Value*, and enter the name *BRIDGE_HTTP_HOST* and value `{3scale-kafka-staging-api-host}/?user_key={3scale-api-key}`.
+. Click *Save* and return to the link:{openshift-host}/topology/ns/{namespace}/graph[Topology View, window="_blank"].
+. Select the *iot-data-generator* node, and use the up arrow on the *Details* screen to scale it to 1 Pod.
+. Meter status events will be generated every 1-2 seconds thanks to the data generator. You can verify this by tailing the *hydrated-meter-events* Topic again:
++
+[source,bash,subs="attributes+"]
+----
+oc exec iot-cluster-kafka-0 -- bash -c "./bin/kafka-console-consumer.sh --topic hydrated-meter-events --bootstrap-server localhost:9092 --from-beginning"
+----
++
+image:images/screenshots/22-iot-generated-meter-event.png[Generated IoT Meter Events Rendered in the Mobile Application]
+
+[type=verification]
+Did the *hydrated-meter-events* Topic display a constant stream of meter update events when viewed using `kafka-console-consumer.sh`?
+
+[type=verificationFail]
+{standard-fail-text}
+
 [time=20]
 == Develop the Mobile Application Frontend
 
+A Quarkus application has been included in this workshop to expose an HTTP API that provides access to the *hydrated-meter-events* Topic. 
+
+You'll run this application in Quarkus dev mode using CodeReady Workspaces.
+
+=== Start a Quarkus Server-Sent Events Application
+
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
+. Open a terminal window in the **quarkus-nodejs-tools** container. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/quarkus-nodejs-tools** folder. Click on *>_ New terminal*.
+. Change to the *iot-sse-server* directory using the `cd {che-project-name}/services/iot-sse-server` command.
+. Open the *{che-project-name}/services/iot-sse-server/src/main/resources/application.properties* and set *kafka.bootstrap.servers* to `iot-cluster-kafka-brokers.{user-username}:9092`. The `{user-username}` suffix is necessary since the Che Pod is not running the same namespace as the `iot-cluster-kafka-brokers` Service.
+. Also, take note of the following:
+  * In the *application.properties* a *incoming.meter-events* channel is configured to read from the *hydrated-meter-events* Topic by default.
+  * The *MeterEventResource.java* file specifies that `GET /meters/stream` produces a JSON stream of data from *incoming.meter-events* channel using Server-Sent Events.
+. Start the application using the following command:
++
+[source,bash,subs="attributes+"]
+----
+mvn quarkus:dev
+----
+. When prompted to view an application preview select *Open Link*. A preview window will open, and the mobile application will render inside this window. If the application does not load on the initial attempt, click the *Refresh* icon at the top of the preview window.
+. After a few moments the application will start, and CodeReady Workspaces will ask if you'd like expose a route to the application on port `8080`. Select *Yes* when prompted for port `8080` and *No* for any other ports.
+. The displayed application Preview should look similar to this screenshot:
++
+image:images/screenshots/23-iot-quarkus-sse-home.png[Quarkus SSE Application Homepage]
+. Take note of the URL from the Preview window. You'll need it in the next section.
+
+[type=verification]
+Did the Quarkus application render in a CodeReady workspaces preview window?
+
+[type=verificationFail]
+If the application does not load on the initial attempt, click the *Refresh* icon at the top of the preview window. {standard-fail-text}
+
 === Run the Mobile Application in Dev Mode using CodeReady Workspaces
 
-A mobile application developed using link:https://ionicframework.com/[Ionic Framework, window="_blank"] and link:https://reactjs.org/[React, window="_blank"] is included in this lab.
+A cross-platform platform mobile application developed using link:https://ionicframework.com/[Ionic Framework, window="_blank"] and link:https://reactjs.org/[React, window="_blank"] is included in the *{che-project-name}/services/mobile-app/* folder of this workshop.
 
-The Ionic Framework allows developers to create cross-platform mobile applications using Angular and React. Vue support is coming soon.
+In this section you'll run this application in dev mode in CodeReady Workspaces, and connect it to the Quarkus application that's running in dev mode.
 
-In this section you'll run this application in dev mode in CodeReady Workspaces.
-
-. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password credentials, and open your workspace.
-. Open a terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
+. Leave the Quarkus application from the previous section running in dev mode. 
+. Open an **openshift-tools** terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . Change to the *mobile-app* directory using the `cd {che-project-name}/services/mobile-app` command.
 . Install the application dependencies using npm:
++
 [source,bash,subs="attributes+"]
 ----
 npm install
 ----
-. The application requires an URL to be passed via an environment variable at build time. This is the URL for the Quarkus Server-Sent Events application. Start the application using the following commands:
+. The application requires a URL to be passed via an environment variable at build time. This is the URL for the Quarkus Server-Sent Events application that was printed in the Preview window for the Quarkus application you started via `mvn quarkus:dev`. Start the application using the following command (remember to replace the example URL):
++
 [source,bash,subs="attributes+"]
 ----
-export SSE_APP_ROUTE=$(oc get route/iot-sse-server -o jsonpath={.spec.host})
-
-REACT_APP_SSE_HOSTNAME="http://$SSE_APP_ROUTE" npm start
+REACT_APP_SSE_HOSTNAME="http://routeexample-che.apps.cluster-example.example.example.opentlc.com/" npm start
 ----
-. Once the Node.js server starts it will serve the mobile application on port 3000. CodeReady Workspaces will ask if you'd like expose a route to the application. Click *Yes* when prompted.
-. A preview window will open, and the mobile application will render inside this window. If the application does not load on the initial attempt, click the *Refresh* icon at the top of the preview window.
+. Once the Node.js server starts it will serve the mobile application on port `3000`. CodeReady Workspaces will ask if you'd like expose a route to the application on port `3000`. Click *Yes* when prompted.
+. When prompted click the *Open Link* button and the Quarkus application Preview will be replaced by the mobile application. If the application does not load on the initial attempt, click the *Refresh* icon at the top of the preview window.
 +
 image:images/screenshots/19-mobile-application-preview.png[Mobile Application Preview in CodeReady Workspaces]
 
@@ -999,13 +1106,13 @@ You may have already guessed, but to get real-time data showing in the applicati
 
 . Leave the `npm start` process from the previous section running, or start it again if you stopped it. This will allow the mobile application preview to continue to work.
 . Select the *Meters* tab in the mobile application and verify that it a *Streaming Events* messages is displayed under a blue loading bar. If the bar turns 
-. Open *_another_* terminal window in CodeReady Workspaces. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/tools** folder. Click on *>_ New terminal*.
+. Open *_another_* terminal window in CodeReady Workspaces. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . In this new terminal issue a meter update using the following cURL command:
 +
 [source,bash,subs="attributes+"]
 ----
 curl -X POST \
-{3scale-kafka-staging-api-host}/topics/meters?user_key=YOUR_KEY_HERE \
+{3scale-kafka-staging-api-host}/topics/meters?user_key={3scale-api-key} \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
@@ -1026,27 +1133,18 @@ Did the mobile application display a meter update event?
 [type=verificationFail]
 If the mobile application doesn't receive events for a few seconds it will disconnect from the server. Use the reconnect button then send another cURL request. {standard-fail-text}
 
-=== Simulating Hundreds & Thousands of Events
+===  View 3scale API Management Analytics
 
-Now that you've verified the application is working, let's simulate some load. An *iot-data-generator* Deployment was included in the *{namespace}* Project for this purpose. 
-
-. Login to the link:{openshift-host}/topology/ns/{namespace}/graph[OpenShift Console, window="_blank"] to view the *{namespace}* project.
-. Find, and select the *iot-data-generator*. The *Details* tab should display a Pod count of zero.
-. Select the *Edit DeploymentConfig* option from the *Actions* dropdown.
+. Navigate to link:{3scale-url}[3scale API Management, window="_blank"] and login using your username and password.
+. Select the *Product: {3scale-kafka-api-name}* from the top navigation dropdown.
+. From the *Overview* screen from the *{3scale-kafka-api-name}* Product click the *Analytics* link.
+. By default this will show the *Traffic* analytics. This shows the number of API calls, or *hits*, received during specific time windows. By default the past 24 hours is shown. It should resemble this screenshot.
 +
-image:images/screenshots/21-iot-data-gen-pods.png[IoT Data Generator Pod Count]
-. Navigate to the *Environment* tab in the *Deployment Config Details* screen.
-. Change the *TRANSPORT_MODE* value from `kafka` to `http`.
-. Click *Add Value*, and enter the name *BRIDGE_HTTP_HOST* and value `{3scale-kafka-staging-api-host}/?user_key=YOUR_KEY_HERE`.
-. Click *Save* and return to the link:{openshift-host}/topology/ns/{namespace}/graph[Topology View, window="_blank"].
-. Select the *iot-data-generator* node, and use the up arrow on the *Details* screen to scale it to 1 Pod.
-. Return to the mobile application preview in CodeReady Workspaces and connect to the Meters stream.
-. Meter status events should flow in every couple of seconds thanks to the data generator.
-+
-image:images/screenshots/22-iot-generated-meter-event.png[Generated IoT Meter Events Rendered in the Mobile Application]
+image:images/screenshots/24-3scale-api-mgmt-hits.png[3scale API Management Analytics]
+. Try disabling the *iot-data-generator* from the link:{user-topology-url}[Topology View, window="_blank"] and see how it affects the analytics.
 
 [type=verification]
-Did the mobile application display a constant stream of meter update events?
+Were you able to view the hits?
 
 [type=verificationFail]
-{standard-fail-text}
+If the mobile application doesn't receive events for a few seconds it will disconnect from the server. Use the reconnect button then send another cURL request. {standard-fail-text}
