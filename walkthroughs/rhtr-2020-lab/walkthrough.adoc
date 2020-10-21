@@ -47,7 +47,7 @@ image::images/rylan-hill-parking-meter-unsplash.jpg[integration, role="integr8ly
 
 {blank}
 
-The city's, under Red Hat's guidance, has decided to roll out a new Microservices and Event-Driven Architecture using the following stack:
+The city, under Red Hat's guidance, has decided to roll out a new Microservices and Event-Driven Architecture using the following stack:
 
 * OpenShift 4
 * Red Hat AMQ Streams with Change Data Capture
@@ -77,7 +77,7 @@ image::images/architecture.png[integration, role="integr8ly-img-responsive"]
 
 {blank}
 
-That sure seems like a lot of work, but don't worry we'll be guiding you every step of the way. Click the button below when you're ready to get started!
+That sure seems like a lot of work, but don't worry we'll be guiding you every step of the way. Click the button at the bottom of this page when you're ready to get started!
 
 [type=walkthroughResource,serviceName=openshift]
 .Red Hat OpenShift
@@ -122,17 +122,16 @@ In CodeReady Workspaces changes to files are auto-saved every few seconds, so yo
 === Start a CodeReady workspace
 
 . Once you have logged in and authorized access to your user account, you will land in your personal CodeReady dashboard. 
-. Click on the workspace with the name starting with `kafka-iot-{u  ser-username}` on the left menu bar under *RECENT WORKSPACES*.
+. Click on the workspace with the name starting with `kafka-iot-{user-username}` on the left menu bar under *RECENT WORKSPACES*.
 . This will start an instance of the workspace. Please wait a few moments while it downloads the required container images and configuration setup.
-. The first time it’s run, it will `git clone` the required project files for this workshop. After a minute or two, you’ll be placed in the workspace. Close the initial welcome and README tabs then click on the Explorer button on the left side bar.
-
+. The first time it’s run, it will `git clone` the required project files for this workshop. After a minute or two, you’ll be placed in the workspace. Close the initial welcome and README tabs then click on the Explorer button (it resembles a file icon) on the left side bar.
++
 [NOTE]
 ====
 This IDE is based on *Eclipse Che*, which is in turn is based on Microsoft VS Code editor. It will look familiar if you have already used it.
 
 You can close the _Problems_ and _Output_ views to clear space.
 ====
-
 . The project explorer will show you a list of folders. Expand the folder named *{che-project-name}* to reveal the services we cloned from a git repository.
 . During the workshop we will need to introduce commands for both OpenShift, and other Command Line Interface (CLI) tools. For that we will need to start a terminal window _inside_ one of the containers from the developer workspace. To open the terminal window, click on the _My Workspace_ button (it looks like a cube) on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . This will deploy the terminal window in the bottom of the screen. This terminal is attached to the running CodeReady container and is also running on OpenShift. This is the place where you will issue most of the commands from this workshop.
@@ -148,6 +147,7 @@ oc login -u {user-username} -p {user-password} https://$KUBERNETES_SERVICE_HOST:
 
 . You should see something like the following (the project names may be different):
 +
+[source,bash,subs="attributes+"]
 ----
 Login successful.
 
@@ -272,7 +272,7 @@ image:images/screenshots/04-topology-with-kafka-cluster.png[Topology View with K
 . Click on the *From Catalog* option.
 . Type in `kafka` in the search text field and then click on *Kafka Topic*.
 . Click the *Create* button.
-. Create a `Kafka Topic` Custom Resource to define your connector. Replace the contents of the _YAML_ editor with the following code:
+. Create a `Kafka Topic` Custom Resource to define your connector. Change to the the *YAML View*. Replace the contents of the _YAML_ editor with the following code:
 +
 [source,yaml,subs="attributes+"]
 ----
@@ -303,10 +303,10 @@ The included *iot-data-generator* is a Producer, but you won't be using it just 
 
 . Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
 . Click *+Add* on the left menu.
-. Click on the *From Catalog* option.
+. Click on the *YAML* option.
 . Type in `kafka` in the search text field and then click on *Kafka Bridge*.
 . Click the *Create* button.
-. Create a `Kafka Bridge` Custom Resource to define your connector. Replace the contents of the _YAML_ editor with the following code:
+. Create a `Kafka Bridge` Custom Resource to define your connector. Change to the the *YAML View*. Replace the contents of the _YAML_ editor with the following code:
 +
 [source,yaml,subs="attributes+"]
 ----
@@ -432,7 +432,7 @@ Can you see the 3scale API Management dashboard and navigate the main menu?
 . Select *Create Application Plan*. You will be redirected to the *Application Plans* screen as shown in the following screenshot.
 +
 image:images/screenshots/26-application-plans.png[3scale Application Plans]
-. Select the *Publish* link, beside your plan list item, to publish the Plan.
+. Click the *Publish* link beside your plan list item, to publish the Plan.
 
 {blank}
 
@@ -543,7 +543,7 @@ Ensure that the API Key (`user_key`) is defined in the sample Staging cURL comma
 
 At this point you've setup Kafka infrastructure and API Management capabilities to ingest data from IoT devices (Producers). Next, you'll process that data using a CamelK Integration as a Consumer.
 
-This Consumer process Parking Meter events and writes the resulting data to the Postgres database for long-term storage in accordance with city of LA requirements.
+This Consumer processes Parking Meter events from Kafka and writes the resulting data to the Postgres database for long-term storage in accordance with city of LA requirements.
 
 === Deployment using the Kamel CLI
 . Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
@@ -561,7 +561,7 @@ oc login -u {user-username} -p {user-password} https://$KUBERNETES_SERVICE_HOST:
 +
 [source,bash,subs="attributes+"]
 ----
-`oc project {user-username}`
+oc project {user-username}
 ----
 . Expand the *{che-project-name}/services/camel-iot-ingestion* folder, and open the *meters.properties* file.
 . Verify that the *kafka.host* and *kafka.port* values are correct. Do this by running `oc get svc -n {namespace}` and finding the corresponding host and ports for the Kafka Broker in the terminal output. Amend the *meters.properties* file if necessary.
@@ -601,7 +601,7 @@ The *Red Hat Integration - CamelK* operator will start building your integration
 {blank}
 
 [type=verification]
-Did the CamelK Integration start? Were the logs free of errors?
+Did the `kamel` command report "integration "meters-consumer" created"?
 
 [type=verificationFail]
 Verify that the `kamel` command returned no errors, and that the *meters.kafka.props* ConfigMap was created. {standard-fail-text}
@@ -618,7 +618,7 @@ You can run the following commands to view the resources created by the *Red Hat
 
 {blank}
 
-Once you're finished exploring these resources, you can monitor the integration:
+Once you're finished exploring these resources and note that the CamelK Build is complete, you can monitor the integration:
 
 . Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
 . A new node containing the a *meters-consumer*  Deployment should be shown. If the Deployment is missing, wait a little longer so the operator can finish building it.
@@ -678,7 +678,13 @@ Did you get a successful response from the 3scale API endpoint? Is the CamelK in
 
 The LA Department of Transport are building a mobile application that will enable engineers to see real-time Parking Meter updates.
 
-To facilitate this, you'll setup *change data capture (CDC)* using Debezium and Kafka Connect to stream database events from the *meter_update* table to a Kafka Topic. This will provide a real-time data feed without adding additional load on the database.
+To facilitate this, you'll setup *change data capture (CDC)* using Debezium and Kafka Connect to stream database events from the *meter_update* database table to a Kafka Topic. This will provide a real-time data feed without adding additional load on the database.
+
+The descriptions of Kafka Connect and Debezium from their respective documentation are included below.
+
+_Kafka Connect is a tool for scalably and reliably streaming data between Apache Kafka and other systems._
+
+_Debezium is an open source distributed platform for change data capture. Each Debezium connector monitors one database cluster/server, and connectors are configured and deployed to a cluster of Kafka Connect._
 
 === Deploy Kafka Connect
 . The Postgres instance used in this lab has been pre-configured with the Debezium extensions, so you will configure a Kafka Connect to communicate with it.
@@ -714,7 +720,9 @@ image:images/screenshots/12-kafka-connect-topology.png[Kafka Connect in the Topo
 
 === Create a Kafka Connector
 
-Now that a Kafka Connect instance is running, you need to deploy a Kafka Connector.
+Now that a Kafka Connect instance is running, you need to deploy a Kafka Connector. Here's the definition of Connectors from the Kafka Documentation:
+
+_Connectors manage integration of Kafka Connect with another system, either as an input that ingests data into Kafka or an output that passes data to an external system._
 
 . Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
 . Click *+Add* on the left menu.
@@ -784,6 +792,8 @@ curl -X POST \
 ----
 . A successful response will look similar to this JSON: `{"offsets":[{"partition":0,"offset":3}]}`
 
+{blank}
+
 You'll see the result of this cURL request in a subsequent section.
 
 === Examine the Kafka Topics Listing
@@ -831,7 +841,7 @@ Were you able to view entries in the *city-info.updates.public.meter_update* Top
 
 Connecting a mobile application directly to the CDC generated Topics would be inefficient. The generated messages are incredibly verbose, and the application would need to subscribe to the Topics for `meter_update` and `meter` tables to obtain all relevant information to build a meaningful UI. This would result in increased bandwidth and battery usage, and also tightly couple applications to the CDC generated Topic data structures.
 
-In this section you'll use Kafka Streams to create a new Topic. This Topic will be the result of a *join*, and will contain simplified JSON Objects with just the relevant fields from the messages in both CDC Topics.
+In this section you'll use Kafka Streams to create a new Topic. This Topic will be the result of a *join*, and will contain simplified JSON Objects with just the relevant fields from the messages in both CDC Topics. This is an implementation of the Outbox design pattern.
 
 The following fields will be required by the mobile application to display a meaningful real-time feed of IoT events:
 
@@ -879,7 +889,7 @@ Were you able to build the application on OpenShift using Source-to-Image?
 ----
 oc new-app --image-stream="{user-username}/ladot-cdc-aggregator:1.0-SNAPSHOT"
 ----
-. After a few moments the application should scale to a single Pod in the *READY* state. Verify this via the `oc get deployments/ladot-cdc-aggregator` command.
+. After a few moments the application should scale to a single Pod in the *READY* state. Verify this via the `oc get pods -l deploymentconfig=ladot-cdc-aggregator` command.
 . You can use a label to change icon displayed for the *Deployment* on the *Topology View*. To display a Quarkus icon for the *ladot-cdc-aggregator* issue this command:
 +
 [source,bash,subs="attributes+"]
@@ -914,7 +924,7 @@ The streams application is deployed, but it requires two new topics to be create
 ----
 oc login -u {user-username} -p {user-password} https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true
 oc project {user-username}
-oc get pods | grep aggregator
+oc get pods -l deploymentconfig=ladot-cdc-aggregator
 ----
 . The Pod should have a name similar to *ladot-cdc-aggregator-56d4796796-v8hb8*. Use this command to tail the logs:
 +
@@ -1003,7 +1013,7 @@ oc exec iot-cluster-kafka-0 -- bash -c "./bin/kafka-console-consumer.sh --topic 
 ----
 . An example of resulting output from this command is shown in the screenshot included below.
 +
-image:images/screenshots/16-meter-join-log.png[Kafka Streams Application Logs for the Join]
+image:images/screenshots/17-hydrated-events-topic.png[Kafka Streams Application Logs for the Join]
 
 [type=verification]
 Did the `kafka-console-consumer.sh` print messages from the *hydrated-meter-events* Topic to the console?
@@ -1022,7 +1032,7 @@ Now that you've verified the integrations are working, you can simulate some rea
 image:images/screenshots/21-iot-data-gen-pods.png[IoT Data Generator Pod Count]
 . Navigate to the *Environment* tab in the *Deployment Config Details* screen.
 . Change the *TRANSPORT_MODE* value from `kafka` to `http`.
-. Click *Add Value*, and enter the name *BRIDGE_HTTP_HOST* and value `{3scale-kafka-staging-api-host}/?user_key={3scale-api-key}`.
+. Click *Add Value*, and enter the name *BRIDGE_HTTP_HOST* and value `{3scale-kafka-staging-api-host}?user_key={3scale-api-key}`.
 . Click *Save* and return to the link:{openshift-host}/topology/ns/{namespace}/graph[Topology View, window="_blank"].
 . Select the *iot-data-generator* node, and use the up arrow on the *Details* screen to scale it to 1 Pod.
 . Meter status events will be generated every 1-2 seconds thanks to the data generator. You can verify this by tailing the *hydrated-meter-events* Topic again:
@@ -1031,8 +1041,6 @@ image:images/screenshots/21-iot-data-gen-pods.png[IoT Data Generator Pod Count]
 ----
 oc exec iot-cluster-kafka-0 -- bash -c "./bin/kafka-console-consumer.sh --topic hydrated-meter-events --bootstrap-server localhost:9092 --from-beginning"
 ----
-+
-image:images/screenshots/22-iot-generated-meter-event.png[Generated IoT Meter Events Rendered in the Mobile Application]
 
 [type=verification]
 Did the *hydrated-meter-events* Topic display a constant stream of meter update events when viewed using `kafka-console-consumer.sh`?
@@ -1056,7 +1064,7 @@ You'll run this application in Quarkus dev mode using CodeReady Workspaces.
 . Also, take note of the following:
   * In the *application.properties* a *incoming.meter-events* channel is configured to read from the *hydrated-meter-events* Topic by default.
   * The *MeterEventResource.java* file specifies that `GET /meters/stream` produces a JSON stream of data from *incoming.meter-events* channel using Server-Sent Events.
-. Start the application using the following command:
+. Start the application using the following command from the root of the `{che-project-name}/services/iot-sse-server` directory:
 +
 [source,bash,subs="attributes+"]
 ----
@@ -1067,7 +1075,7 @@ mvn quarkus:dev
 . The displayed application Preview should look similar to this screenshot:
 +
 image:images/screenshots/23-iot-quarkus-sse-home.png[Quarkus SSE Application Homepage]
-. Take note of the URL from the Preview window. You'll need it in the next section.
+. Take note of the URL (highlighted via a red box in the screenshot) from the Preview window. You'll need it in the next section.
 
 [type=verification]
 Did the Quarkus application render in a CodeReady workspaces preview window?
@@ -1091,7 +1099,7 @@ In this section you'll run this application in dev mode in CodeReady Workspaces,
 ----
 npm install
 ----
-. The application requires a URL to be passed via an environment variable at build time. This is the URL for the Quarkus Server-Sent Events application that was printed in the Preview window for the Quarkus application you started via `mvn quarkus:dev`. Start the application using the following command (remember to replace the example URL):
+. The application requires a URL to be passed via an environment variable at build time. This is the URL for the Quarkus Server-Sent Events application that is visible at the top of the Preview after running `mvn quarkus:dev`. Start the application using the following command (remember to replace the example URL with the URL of your Quarkus application!):
 +
 [source,bash,subs="attributes+"]
 ----
@@ -1133,7 +1141,7 @@ curl -X POST \
 ----
 . The mobile application will render the event after a few seconds.
 +
-image:images/screenshots/19-mobile-application-preview.png[Mobile Application Preview in CodeReady Workspaces]
+image:images/screenshots/22-iot-generated-meter-event.png[Mobile Application Preview in CodeReady Workspaces]
 
 [type=verification]
 Did the mobile application display a meter update event?
