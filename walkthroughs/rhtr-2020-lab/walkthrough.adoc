@@ -103,7 +103,7 @@ That sure seems like a lot of work, but don't worry we'll be guiding you every s
 * link:https://access.redhat.com/documentation/en-us/red_hat_codeready_workspaces/2.0/[Documentation, window="_blank"]
 ****
 
-[time=10]
+[time=15]
 == CodeReady Workspaces Preparation and Project Introduction
 
 You will be using Red Hat CodeReady Workspaces, an online integrated development environment (IDE) based on Eclipse, as your development environment. We've pre-loaded the environment with all the tools you'll need throughout this lab.
@@ -115,7 +115,7 @@ In CodeReady Workspaces changes to files are auto-saved every few seconds, so yo
 
 === Login to CodeReady Workspaces
 
-. To get started go to the link:{codeready-url}[CodeReady console, window="_blank"] and log in using your username and password credentials.
+. To get started go to the link:{codeready-url}[CodeReady console, window="_blank"] and log in using your username (`{user-username}`) and password (`{user-password}`) credentials.
 . You may need to _Authorize Access_ so CodeReady can access your permissions and manage your session. Click on *Allow selected permissions* if prompted.
 
 
@@ -134,6 +134,8 @@ You can close the _Problems_ and _Output_ views to clear space.
 ====
 . The project explorer will show you a list of folders. Expand the folder named *{che-project-name}* to reveal the services we cloned from a git repository.
 . During the workshop we will need to introduce commands for both OpenShift, and other Command Line Interface (CLI) tools. For that we will need to start a terminal window _inside_ one of the containers from the developer workspace. To open the terminal window, click on the _My Workspace_ button (it looks like a cube) on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
++
+image:images/screenshots/29-terminal-open-crw.png[Opening a Terminal in CodeReady Workspaces]
 . This will deploy the terminal window in the bottom of the screen. This terminal is attached to the running CodeReady container and is also running on OpenShift. This is the place where you will issue most of the commands from this workshop.
 
 === Login into the OpenShift cluster via the CLI
@@ -190,7 +192,7 @@ image:images/screenshots/00-initial-project-topology.png[Initial Project Topolog
     * A GraphQL API built using Node.js and link:https://graphback.dev[Graphback, window="_blank"]. This provides access to Meter and Junction data stored in Postgres.
     * An NGINX container that serves a web application built using React. This web application communicates with the GraphQL API.
 . Click on the NGINX node in the Topology View.
-. Select the the *Resources* tab, and click the URL listed under *Routes*. It will look similar to `https://sensor-management-ui-{namespace}.apps.$CLUSTER_URL`.
+. Select the the *Resources* tab, and click the URL listed under *Routes*. It will look similar to `https://sensor-management-ui-{namespace}.{openshift-app-host}`.
 . The link should render a web application with a title *LA Department of Transport* similar to the one shown below.
 +
 image:images/screenshots/01-sensor-mgmt-ui.png[LA DoT Home Page]
@@ -209,13 +211,18 @@ Were you able to view the Meters list in the web application? If so, you are rea
 [type=verificationFail]
 {standard-fail-text}
 
-[time=15]
+[time=20]
 == Setup a Kafka Cluster, Topics, and HTTP Bridge
 
 The OpenShift 4 cluster that this lab is being run on has had the *Red Hat Integration - AMQ Streams* operator pre-installed. You'll be using the link:{https://docs.openshift.com/container-platform/4.5/operators/crds/crd-extending-api-with-crds.html#crd-creating-custom-resources-from-file_crd-extending-api-with-crds}[Custom Resources, window="_blank"] provided by the operator to create a Kafka Cluster. Documentation for AMQ Streams on OpenShift can be found at link:{https://access.redhat.com/documentation/en-us/red_hat_amq/7.7/html-single/using_amq_streams_on_openshift/index}[this link, window="_blank"].
 
 === Create the Kafka Cluster 
 A Kafka Cluster is created by providing OpenShift with an instance of a *Kafka* link:{https://docs.openshift.com/container-platform/4.5/operators/crds/crd-extending-api-with-crds.html#crd-creating-custom-resources-from-file_crd-extending-api-with-crds}[Custom Resource, window="_blank"] via the `oc apply` command, or via the OpenShift Developer Catalog UI. The AMQ Streams operator will create the Kafka Cluster based on the parameters specified in the CR.
+
+[NOTE]
+====
+Throughout this workshop you'll need to copy block of code. Make sure you expand these using the arrow (`>`) to preserve formatting and copy the entire block.
+====
 
 . Open the OpenShift Developer Console link:{user-topology-url}[Topology View, window="_blank"].
 . Click *+Add* on the left menu.
@@ -334,18 +341,19 @@ image:images/screenshots/05-topology-with-kafka-bridge.png[Topology View with Ka
 
 === Verify the Cluster, Topics, and Bridge
 
-Now that the bridge has been created, you can use it place data into the *meters* Topic. 
+Now that the bridge has been created, you can use it to place data into the *meters* Topic. 
 
 By default, the Kafka HTTP Bridge is does not expose an OpenShift Route so it cannot be accessed from outside the cluster. To test the Bridge you'll send a POST request using cURL from the terminal in CodeReady Workspaces; this works since the request will originate from within the OpenShift cluster.
 
 . Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
 . To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . To find the hostname of the Kafka HTTP Bridge run the `oc get svc -n {namespace}` command. It should list the `iot-cluster-kafka-bridge-service` and the port it is listening on.
-. Run a `date +%s` command to get a valid timestamp for the request payload.
-. From the terminal, run the following command to place a message into the *meters* Topic. Replace the `timestamp` value with the output from the previous `date` command:
+. From the terminal, run the following command to place a message into the *meters* Topic:
 +
 [source,bash,subs="attributes+"]
 ----
+TIMESTAMP=`date +%s`
+
 curl -X POST \
 {kafka-bridge-service-url}/topics/meters \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
@@ -353,7 +361,7 @@ curl -X POST \
   "records": [
       {
         "key": "F6PeB2XQRYG-8EN5yFcrP",
-        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1601316823,"status":"unknown"}
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":'$TIMESTAMP',"status":"unknown"}
       }
   ]
 }'
@@ -366,7 +374,7 @@ Did you receive a JSON response from the Kafka HTTP Bridge that is similar to th
 [type=verificationFail]
 {standard-fail-text}
 
-[time=15]
+[time=20]
 == Secure the Kafka HTTP Bridge using 3scale API Management
 
 In the previous section you created a Kafka Bridge to provide HTTP access to the Kafka Cluster and Topics. The Kafka Bridge HTTP endpoint was not exposed using an OpenShift Route since this would enable anyone that discovered the URL to access it.
@@ -514,18 +522,20 @@ Take special note of the API Key in the `user_key` from the *Example curl for te
 . Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
 . To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . Run a `date +%s` command to get a valid timestamp for the request payload.
-. From the terminal, run the following command to place a message into the *meters* Topic. Replace the `timestamp` value with the output from the previous `date` command:
+. From the terminal, run the following command to place a message into the *meters* Topic:
 +
 [source,bash,subs="attributes+"]
 ----
+TIMESTAMP=`date +%s`
+
 curl -X POST \
-{3scale-kafka-staging-api-host}/topics/meters?user_key={3scale-api-key} \
+{3scale-kafka-staging-api-host}topics/meters?user_key={3scale-api-key} \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
       {
         "key": "F6PeB2XQRYG-8EN5yFcrP",
-        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"status":"unknown"}
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":'$TIMESTAMP',"status":"unknown"}
       }
   ]
 }'
@@ -538,7 +548,7 @@ Were you able to send a payload to the Kafka Topic via the 3scale API Management
 [type=verificationFail]
 Ensure that the API Key (`user_key`) is defined in the sample Staging cURL command with the correct key. Verify that you entered the correct Kafka Bridge Service URL in the Backend configuration. {standard-fail-text}
 
-[time=15]
+[time=20]
 == Deploying a CamelK Integration to Process Topics
 
 At this point you've setup Kafka infrastructure and API Management capabilities to ingest data from IoT devices (Producers). Next, you'll process that data using a CamelK Integration as a Consumer.
@@ -631,14 +641,16 @@ image:images/screenshots/06-camelk-meters-running.png[CamelK Meters Consumer in 
 +
 [source,bash,subs="attributes+"]
 ----
+TIMESTAMP=`date +%s`
+
 curl -X POST \
-{3scale-kafka-staging-api-host}/topics/meters?user_key={3scale-api-key} \
+{3scale-kafka-staging-api-host}topics/meters?user_key={3scale-api-key} \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
       {
         "key": "F6PeB2XQRYG-8EN5yFcrP",
-        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"status":"unknown"}
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":'$TIMESTAMP',"status":"unknown"}
       }
   ]
 }'
@@ -673,7 +685,7 @@ Was your JSON processed by the CamelK integration and insterted into the *meter_
 [type=verificationFail]
 Did you get a successful response from the 3scale API endpoint? Is the CamelK integration able to connect to the Postgres database? {standard-fail-text}
 
-[time=15]
+[time=25]
 == Kafka Configuration for Change Data Capture
 
 The LA Department of Transport are building a mobile application that will enable engineers to see real-time Parking Meter updates.
@@ -774,18 +786,20 @@ To verify the Connector is working as expected you'll want to send a new message
 . Navigate to the link:{codeready-url}[CodeReady console, window="_blank"]. Log in using your username and password, and open your workspace.
 . To open the terminal window, click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . Run a `date +%s` command to get a valid timestamp for the request payload.
-. From the terminal, run the following command to place a message into the *meters* Topic. Replace the `timestamp` value with the output from the previous `date` command:
+. From the terminal, run the following command to place a message into the *meters* Topic:
 +
 [source,bash,subs="attributes+"]
 ----
+TIMESTAMP=`date +%s`
+
 curl -X POST \
-{3scale-kafka-staging-api-host}/topics/meters?user_key={3scale-api-key} \
+{3scale-kafka-staging-api-host}topics/meters?user_key={3scale-api-key} \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
       {
         "key": "F6PeB2XQRYG-8EN5yFcrP",
-        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"status":"unknown"}
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":'$TIMESTAMP',"status":"unknown"}
       }
   ]
 }'
@@ -836,7 +850,7 @@ Were you able to view entries in the *city-info.updates.public.meter_update* Top
 [type=verificationFail]
 {standard-fail-text}
 
-[time=20]
+[time=25]
 == Deploy a Quarkus Kafka Streams Application
 
 Connecting a mobile application directly to the CDC generated Topics would be inefficient. The generated messages are incredibly verbose, and the application would need to subscribe to the Topics for `meter_update` and `meter` tables to obtain all relevant information to build a meaningful UI. This would result in increased bandwidth and battery usage, and also tightly couple applications to the CDC generated Topic data structures.
@@ -861,7 +875,12 @@ The following fields will be required by the mobile application to display a mea
   * A new `org.apache.kafka.streams.kstream.KTable` is created from the *city-info.updates.public.meter* and modified using *map* to simplify lookups using the `meter_id` as a key.
   * Finally, a stream is created using the *city-info.updates.public.meter_update* Topic. This stream is mapped to use `meter_id` as a key, then joined with the KTable to produce objects containing fields from both.
 . Open the *{che-project-name}/services/ladot-kafka-streams/aggregator/src/main/resources/application.properties* file.
-. Change the bootstrap server values from `localhost:9092` to `iot-cluster-kafka-brokers:9092` (or the *Service* name associated with your brokers found using `oc get services -n {namespace}`) in the *application.properties*.
+. Change the bootstrap server value in the *application.properties* as follows:
++
+[source,bash,subs="attributes+"]
+----
+kafka.bootstrap.servers=${KAFKA_BOOTSTRAP_SERVERS:iot-cluster-kafka-brokers:9092}
+----
 . Open an *openshift-tools* terminal window. Click on the _My Workspace_ button on the right side panel and expand the **User Runtimes/openshift-tools** folder. Click on *>_ New terminal*.
 . Run the following commands to build the Kafka Streams service using a Source-to-Image (s2i) Build. This will take approximately 1-2 minutes:
 +
@@ -986,14 +1005,16 @@ spec:
 +
 [source,bash,subs="attributes+"]
 ----
+TIMESTAMP=`date +%s`
+
 curl -X POST \
-{3scale-kafka-staging-api-host}/topics/meters?user_key={3scale-api-key} \
+{3scale-kafka-staging-api-host}topics/meters?user_key={3scale-api-key} \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
       {
         "key": "F6PeB2XQRYG-8EN5yFcrP",
-        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"status":"unknown"}
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":'$TIMESTAMP',"status":"unknown"}
       }
   ]
 }'
@@ -1127,14 +1148,16 @@ You may have already guessed, but to get real-time data showing in the applicati
 +
 [source,bash,subs="attributes+"]
 ----
+TIMESTAMP=`date +%s`
+
 curl -X POST \
-{3scale-kafka-staging-api-host}/topics/meters?user_key={3scale-api-key} \
+{3scale-kafka-staging-api-host}topics/meters?user_key={3scale-api-key} \
 -H 'content-type: application/vnd.kafka.json.v2+json' \
 -d '{
   "records": [
       {
         "key": "F6PeB2XQRYG-8EN5yFcrP",
-        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":1600959192,"status":"unknown"}
+        "value": {"meterId":"F6PeB2XQRYG-8EN5yFcrP","timestamp":'$TIMESTAMP',"status":"unknown"}
       }
   ]
 }'
