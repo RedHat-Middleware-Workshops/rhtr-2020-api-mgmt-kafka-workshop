@@ -13,7 +13,7 @@ spec:
   - name: 8080-tcp
     port: 8080
     protocol: TCP
-    targetPort: 8081
+    targetPort: 8080
   selector:
     app: iot-sse-server
     deploymentconfig: iot-sse-server
