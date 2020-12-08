@@ -7,14 +7,9 @@ send out a JSON payload with containing its state.
 
 ## Simulation Specifics
 
-1. Once per minute an "update" function is executed.
-1. This updates the state of each parking meter and junction.
-1. The new state is flushed to a **[transport]**. This is defined via environment variables.
-
-Currently this generates a large volume of data. We can revise this strategy to
-control the flow/frequency of updates.
-
-Configure this by setting a `TRANSPORT_MODE` environment variable.
+1. On a defined interval (every 2.5 seconds by default) and "update" function is triggered.
+1. This updates the state of a randomly selected parking meter.
+1. The new state is flushed to a **[transport]**. This is chosen via the `TRANSPORT_MODE` environment variable.
 
 ## Requirements
 
