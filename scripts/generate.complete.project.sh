@@ -4,8 +4,10 @@ cd $DIR/..
 FILENAME="project.complete.yml"
 FOLDERS=$(find . -name "openshift" -maxdepth 4)
 
-# create the initial file
-rm $FILENAME
+# remove and recreate the initial file
+if [[ -f "$FILENAME" ]]; then
+    rm $FILENAME
+fi
 touch $FILENAME
 
 # append all files to the $FILENAME

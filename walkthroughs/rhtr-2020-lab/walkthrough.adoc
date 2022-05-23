@@ -238,7 +238,7 @@ image:images/screenshots/23-kafka-yaml-view.png[Kafka Add Resources YAML View]
 +
 [source,yaml,subs="attributes+"]
 ----
-apiVersion: kafka.strimzi.io/v1beta1
+apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
   name: iot-cluster
@@ -283,7 +283,7 @@ image:images/screenshots/04-topology-with-kafka-cluster.png[Topology View with K
 +
 [source,yaml,subs="attributes+"]
 ----
-apiVersion: kafka.strimzi.io/v1beta1
+apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
 metadata:
   name: meters
@@ -317,7 +317,7 @@ The included *iot-data-generator* is a Producer, but you won't be using it just 
 +
 [source,yaml,subs="attributes+"]
 ----
-apiVersion: kafka.strimzi.io/v1alpha1
+apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaBridge
 metadata:
   name: iot-cluster-kafka
@@ -709,7 +709,7 @@ _Debezium is an open source distributed platform for change data capture. Each D
 +
 [source,yaml,subs="attributes+"]
 ----
-apiVersion: kafka.strimzi.io/v1beta1
+apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnect
 metadata:
   name: iot-connect-cluster
@@ -745,7 +745,7 @@ _Connectors manage integration of Kafka Connect with another system, either as a
 +
 [source,yaml,subs="attributes+"]
 ----
-apiVersion: kafka.strimzi.io/v1alpha1
+apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnector
 metadata:
   name: updates-connector
@@ -966,7 +966,7 @@ These are the Topics that the `org.apache.kafka.streams.kstream.KTable` and new 
 +
 [source,yaml,subs="attributes+"]
 ----
-apiVersion: kafka.strimzi.io/v1beta1
+apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
 metadata:
   name: meter-info-ktable
@@ -984,7 +984,7 @@ spec:
 +
 [source,yaml,subs="attributes+"]
 ----
-apiVersion: kafka.strimzi.io/v1beta1
+apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
 metadata:
   name: hydrated-meter-events
