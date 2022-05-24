@@ -41,7 +41,7 @@ const opts: SwaggerOptions = {
       description: 'Provides a REST interface to the city parking meters',
       version: '0.1.0'
     },
-    schemes: ['http'],
+    schemes: ['http','https'],
     consumes: ['application/json'],
     produces: ['application/json']
   },
