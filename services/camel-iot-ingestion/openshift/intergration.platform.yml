@@ -1,0 +1,19 @@
+kind: IntegrationPlatform
+apiVersion: camel.apache.org/v1
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k
+  namespace: city-of-losangeles
+spec:
+  build: {}
+  kamelet: {}
+  profile: Openshift
+  resources: {}
+status:
+  build:
+    maven:
+      settings: {}
+    registry: {}
+  kamelet: {}
+  resources: {}
