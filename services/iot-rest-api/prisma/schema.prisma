@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model junction {
+  id              String            @id
+  name            String
+  latitude        Float             @db.Real
+  longitude       Float             @db.Real
+  junction_update junction_update[]
+}
+
+model junction_update {
+  id          Int      @id @default(autoincrement())
+  junction_id String
+  timestamp   DateTime @db.Timestamp(6)
+  count_ns    Int
+  count_ew    Int
+  junction    junction @relation(fields: [junction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model meter {
+  id           String         @id
+  address      String
+  latitude     Float          @db.Real
+  longitude    Float          @db.Real
+  meter_update meter_update[]
+}
+
+model meter_update {
+  id          Int      @id @default(autoincrement())
+  meter_id    String
+  timestamp   DateTime @db.Timestamp(6)
+  status_text String
+  meter       meter    @relation(fields: [meter_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}

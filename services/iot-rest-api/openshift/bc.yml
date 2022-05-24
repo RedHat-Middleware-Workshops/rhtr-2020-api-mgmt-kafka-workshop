@@ -1,0 +1,41 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: iot-rest-api
+    app.kubernetes.io/component: iot-rest-api
+    app.kubernetes.io/instance: iot-rest-api
+  name: iot-rest-api
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: iot-rest-api:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    contextDir: services/iot-rest-api
+    git:
+      uri: https://github.com/RedHat-Middleware-Workshops/rhtr-2020-api-mgmt-kafka-workshop
+    type: Git
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: nodejs:14-ubi8
+        namespace: openshift
+    type: Source
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - github:
+      secret: H1sM5ow3ksddUthma4xD
+    type: GitHub
+  - generic:
+      secret: FvmRciZTtLegSfT0wpZW
+    type: Generic
+  - type: ConfigChange
+  - imageChange:
+    type: ImageChange
