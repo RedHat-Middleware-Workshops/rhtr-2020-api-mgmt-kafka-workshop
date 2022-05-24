@@ -112,9 +112,6 @@ app.route<{ Querystring: GetMetersQuery }>({
       skip: pageSize * page,
       include: {
         meter_update: {
-          select: {
-            me
-          },
           take: 1,
           orderBy: {
             timestamp: 'desc'
