@@ -78,7 +78,7 @@ app.route<{ Querystring: GetMetersQuery }>({
             address: { type: 'string' },
             latitude: { type: 'number' },
             longitude: { type: 'number' },
-            meter_update: {
+            status: {
               type: 'object',
               optional: true,
               properties: {
@@ -112,6 +112,9 @@ app.route<{ Querystring: GetMetersQuery }>({
       skip: pageSize * page,
       include: {
         meter_update: {
+          select: {
+            me
+          },
           take: 1,
           orderBy: {
             timestamp: 'desc'
@@ -162,7 +165,7 @@ app.route<{ Params: GetMeterParams }>({
           address: { type: 'string' },
           latitude: { type: 'number' },
           longitude: { type: 'number' },
-          meter_update: {
+          status: {
             type: 'object',
             optional: true,
             properties: {
