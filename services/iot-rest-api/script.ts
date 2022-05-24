@@ -130,7 +130,7 @@ app.route<{ Querystring: GetMetersQuery }>({
       } = m
 
       return {
-        status: meter_update[0] ? { state: meter_update[0].status_text, timestamp: meter_update[0].timestamp } : null,
+        status: meter_update[0] ? { status_text: meter_update[0].status_text, timestamp: meter_update[0].timestamp } : null,
         id,
         latitude,
         longitude,
@@ -218,7 +218,7 @@ app.route<{ Params: GetMeterParams }>({
       } = meter
 
       return {
-        status: meter_update[0] ? { state: meter_update[0].status_text, timestamp: meter_update[0].timestamp } : null,
+        status: meter_update[0] ? { status_text: meter_update[0].status_text, timestamp: meter_update[0].timestamp } : null,
         id,
         latitude,
         longitude,
