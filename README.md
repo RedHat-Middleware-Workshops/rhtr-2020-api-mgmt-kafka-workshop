@@ -4,10 +4,16 @@
 
 Refer to the [services README](/services).
 
-## Deployment on OpenShift
+## Deployment for Demo on OpenShift
+
+This assumes that everything is deployed into the `city-of-losangeles` project
+namespace.
 
 Requires an OpenShift 4.4 or later cluster with the CamelK and AMQ Streams
-operators installed for all namespaces.
+operators installed for all namespaces, and using the CamelK Client 1.5.0
+CLI.
+
+This will create the initial project architecture:
 
 ```bash
 # Generate project.yml from individual definitions in each service
@@ -17,6 +23,42 @@ operators installed for all namespaces.
 oc new-project city-of-losangeles
 oc apply -f project.complete.yml
 ```
+
+Next, deploy the Java-based Kafka Streams application:
+
+```bash
+cd services/ladot-kafka-streams/aggregator/
+mvn clean package -Dquarkus.container-image.build=true
+
+oc new-app --image-stream city-of-losangeles/ladot-cdc-aggregator:1.0-SNAPSHOT \
+-e KAFKA_BOOTSTRAP_SERVERS=iot-cluster-kafka-brokers:9092
+```
+
+Deploy the CamelK service that processes incoming Meter update payloads:
+
+```bash
+cd services/camel-iot-ingestion
+
+oc create configmap meters.kafka.props --from-file=meters.properties
+
+kamel run MetersConsumer.java \
+--secret pg-login \
+--configmap=meters.kafka.props \
+--dependency mvn:org.postgresql:postgresql:42.2.10 \
+--dependency=camel-jdbc \
+--dependency=mvn:org.apache.commons:commons-dbcp2:2.7.0
+```
+
+Wait for the **meters-consumer** deployment to become ready:
+
+```
+oc get deployments meters-consumer -w
+```
+
+Once the **meters-consumer** is ready, scale the **iot-data-generator** up to
+1 Pod and data will flow through the system. You can see the data in realtime
+by opening the **mobile-app** route and selecting the Meters tab in the UI.
+
 
 ## Deploying the Lab AgnosticD Workload
 
