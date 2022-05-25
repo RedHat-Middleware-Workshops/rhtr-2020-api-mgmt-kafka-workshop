@@ -17,7 +17,7 @@ spec:
   resources: {}
   runPolicy: Serial
   source:
-    contextDir: services/parking-finder-app
+    contextDir: services/parking-finder
     git:
       uri: https://github.com/RedHat-Middleware-Workshops/rhtr-2020-api-mgmt-kafka-workshop
       ref: 2022-refresh
