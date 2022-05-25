@@ -100,7 +100,7 @@ app.route<{ Querystring: GetMetersQuery }>({
   },
   handler: async (req) => {
     const { page = 1, search, status } = req.query
-    const pageSize = 20
+    const pageSize = 50
 
     const meters = await prisma.meter.findMany({
       take: pageSize,
