@@ -1,0 +1,12 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  generation: 1
+  labels:
+    app: parking-finder-app
+    app.kubernetes.io/component: parking-finder-app
+    app.kubernetes.io/instance: parking-finder-app
+  name: parking-finder-app
+spec:
+  lookupPolicy:
+    local: false
