@@ -19,10 +19,8 @@ export default async function handler(
     }
   } as OptionsOfJSONResponseBody)
 
-  setTimeout(() => {
-    res
-      .status(200)
-      .setHeader('content-type', 'application/json')
-      .end(spaces.body)
-  }, 3000)
+  res
+    .status(200)
+    .setHeader('content-type', 'application/json')
+    .end(spaces.body)
 }
