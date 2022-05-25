@@ -68,23 +68,16 @@ app.route<{ Querystring: GetMetersQuery }>({
             latitude: { type: 'number' },
             longitude: { type: 'number' },
             status: {
-              anyOf: [
-                {
-                  type: 'object',
-                  properties: {
-                    timestamp: {
-                      type: 'number'
-                    },
-                    status_text: {
-                      type: 'string',
-                      enum: ['available', 'occupied', 'out-of-service', 'unknown']
-                    }
-                  }
+              type: ['object', 'null'],
+              properties: {
+                timestamp: {
+                  type: 'number'
                 },
-                {
-                  type: 'null'
+                status_text: {
+                  type: 'string',
+                  enum: ['available', 'occupied', 'out-of-service', 'unknown']
                 }
-              ]
+              }
             }
           }
         }
@@ -175,22 +168,15 @@ app.route<{ Params: GetMeterParams }>({
           latitude: { type: 'number' },
           longitude: { type: 'number' },
           status: {
-            anyOf: [
-              {
-                type: 'object',
-                properties: {
-                  timestamp: {
-                    type: 'number'
-                  },
-                  status_text: {
-                    type: 'string'
-                  }
-                }
+            type: ['object', 'null'],
+            properties: {
+              timestamp: {
+                type: 'number'
               },
-              {
-                type: 'null'
+              status_text: {
+                type: 'string'
               }
-            ]
+            }
           }
         }
       }
