@@ -31,6 +31,7 @@ function buildDbUrl () {
 
 type GetMetersQuery = {
   page: number
+  search?: string
 }
 
 const opts: SwaggerOptions = {
@@ -49,20 +50,7 @@ const opts: SwaggerOptions = {
 }
 
 app.register(require('@fastify/swagger'), opts)
-app.route({
-  url: '/',
-  method: 'GET',
-  schema: {
-    response: {
-      200: {
-        type: 'array'
-      }
-    }
-  },
-  handler: (req, reply) => {
-    reply.send([])
-  }
-})
+
 app.route<{ Querystring: GetMetersQuery }>({
   method: 'GET',
   url: '/meters',
@@ -79,16 +67,22 @@ app.route<{ Querystring: GetMetersQuery }>({
             latitude: { type: 'number' },
             longitude: { type: 'number' },
             status: {
-              type: 'object',
-              optional: true,
-              properties: {
-                timestamp: {
-                  type: 'number'
+              anyOf: [
+                {
+                  type: 'object',
+                  properties: {
+                    timestamp: {
+                      type: 'number'
+                    },
+                    status_text: {
+                      type: 'string'
+                    }
+                  }
                 },
-                status_text: {
-                  type: 'string'
+                {
+                  type: 'null'
                 }
-              }
+              ]
             }
           }
         }
@@ -99,17 +93,27 @@ app.route<{ Querystring: GetMetersQuery }>({
       properties: {
         page: {
           type: 'number'
+        },
+        search: {
+          type: 'string'
         }
       }
     }
   },
   handler: async (req) => {
-    const { page = 1 } = req.query
+    const { page = 1, search } = req.query
     const pageSize = 20
 
     const meters = await prisma.meter.findMany({
       take: pageSize,
       skip: pageSize * page,
+      // Perform text search on the address if "search" is present in query
+      where: search ? {
+        address: {
+          search: search.split(' ').join(' & ')
+        }
+      } : undefined,
+
       include: {
         meter_update: {
           take: 1,
@@ -163,16 +167,22 @@ app.route<{ Params: GetMeterParams }>({
           latitude: { type: 'number' },
           longitude: { type: 'number' },
           status: {
-            type: 'object',
-            optional: true,
-            properties: {
-              timestamp: {
-                type: 'number'
+            anyOf: [
+              {
+                type: 'object',
+                properties: {
+                  timestamp: {
+                    type: 'number'
+                  },
+                  status_text: {
+                    type: 'string'
+                  }
+                }
               },
-              status_text: {
-                type: 'string'
+              {
+                type: 'null'
               }
-            }
+            ]
           }
         }
       }
