@@ -19,8 +19,5 @@ export default async function handler(
     }
   } as OptionsOfJSONResponseBody)
 
-  res
-    .status(200)
-    .setHeader('content-type', 'application/json')
-    .end(spaces.body)
+  res.status(200).setHeader('content-type', 'application/json').end(spaces.body)
 }
