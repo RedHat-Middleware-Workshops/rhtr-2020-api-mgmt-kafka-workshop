@@ -1,0 +1,27 @@
+.container {
+  display: grid;
+}
+
+.main {
+  display: grid;
+  min-height: 100vh;
+  align-items: center;
+}
+
+.main h1 {
+  width: 100%;
+  color: #fafafa;
+  text-shadow: 0 0 1px gray;
+  background-color:cornflowerblue;
+  margin: auto;
+  height: 10vh;
+  line-height: 10vh;
+}
+
+.map-container {
+  height: 90vh
+}
+
+.main h1 {
+  text-align: center;
+}
