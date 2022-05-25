@@ -75,7 +75,7 @@ const Home: NextPage = () => {
     <GoogleMapReact
       yesIWantToUseGoogleMapApiInternals={true}
       onGoogleApiLoaded={({map, maps}) => apiIsLoaded(map)}
-      bootstrapURLKeys={{ key: 'AIzaSyBlVyHI-sKXDzUiTS8lW6aPpfiXebAJeF4' }}
+      bootstrapURLKeys={{ key: process.env.REACT_APP_MAPS_API_KEY as string }}
       defaultCenter={dtla_coords}
       defaultZoom={15}
     >
