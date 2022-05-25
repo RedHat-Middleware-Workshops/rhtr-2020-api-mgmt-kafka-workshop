@@ -32,6 +32,7 @@ function buildDbUrl () {
 type GetMetersQuery = {
   page: number
   search?: string
+  status?: 'available'|'occupied'|'out-of-service'|'unknown'
 }
 
 const opts: SwaggerOptions = {
@@ -75,7 +76,8 @@ app.route<{ Querystring: GetMetersQuery }>({
                       type: 'number'
                     },
                     status_text: {
-                      type: 'string'
+                      type: 'string',
+                      enum: ['available', 'occupied', 'out-of-service', 'unknown']
                     }
                   }
                 },
@@ -96,12 +98,15 @@ app.route<{ Querystring: GetMetersQuery }>({
         },
         search: {
           type: 'string'
+        },
+        status: {
+          type: 'string'
         }
       }
     }
   },
   handler: async (req) => {
-    const { page = 1, search } = req.query
+    const { page = 1, search, status } = req.query
     const pageSize = 20
 
     const meters = await prisma.meter.findMany({
@@ -116,6 +121,9 @@ app.route<{ Querystring: GetMetersQuery }>({
 
       include: {
         meter_update: {
+          where: status ? {
+            status_text: status
+          } : undefined,
           take: 1,
           orderBy: {
             timestamp: 'desc'
