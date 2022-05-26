@@ -18,6 +18,39 @@ const prisma = new PrismaClient({
   }
 })
 
+const meterIdParamsSchema = {
+  type: 'object',
+  properties: {
+    id: {
+      description: 'The meter ID',
+      type: 'string'
+    }
+  }
+}
+
+const meterInfoSchema = {
+  type: 'object',
+  description: 'The parking meter details, including status if known.',
+  properties: {
+    id: { type: 'string' },
+    address: { type: 'string' },
+    latitude: { type: 'number' },
+    longitude: { type: 'number' },
+    status: {
+      type: ['object', 'null'],
+      properties: {
+        timestamp: {
+          type: 'number'
+        },
+        status_text: {
+          type: 'string',
+          enum: ['maintenance', 'available', 'occupied', 'out-of-service', 'unknown']
+        }
+      }
+    }
+  }
+}
+
 function buildDbUrl () {
   const {
     DB_HOST,
@@ -27,6 +60,42 @@ function buildDbUrl () {
     DB_DATABASE
   } = config
   return `postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}`
+}
+
+async function getMeterById (meterId: string) {
+  const meter = await prisma.meter.findUnique({
+    where: {
+      id: meterId
+    },
+    include: {
+      meter_update: {
+        take: 1,
+        orderBy: {
+          timestamp: 'desc'
+        }
+      }
+    }
+  })
+
+  if (!meter) {
+    return {}
+  } else {
+    const {
+      meter_update,
+      id,
+      latitude,
+      longitude,
+      address
+    } = meter
+
+    return {
+      status: meter_update[0] ? { status_text: meter_update[0].status_text, timestamp: meter_update[0].timestamp } : null,
+      id,
+      latitude,
+      longitude,
+      address
+    }
+  }
 }
 
 type GetMetersQuery = {
@@ -60,27 +129,7 @@ app.route<{ Querystring: GetMetersQuery }>({
       200: {
         type: 'array',
         description: 'List of parking meters and their latest status, if known.',
-        items: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            address: { type: 'string' },
-            latitude: { type: 'number' },
-            longitude: { type: 'number' },
-            status: {
-              type: ['object', 'null'],
-              properties: {
-                timestamp: {
-                  type: 'number'
-                },
-                status_text: {
-                  type: 'string',
-                  enum: ['available', 'occupied', 'out-of-service', 'unknown']
-                }
-              }
-            }
-          }
-        }
+        items: meterInfoSchema
       }
     },
     querystring: {
@@ -159,83 +208,57 @@ app.route<{ Params: GetMeterParams }>({
         type: 'object',
         properties: {}
       },
-      200: {
-        type: 'object',
-        description: 'The parking meter details, including status if known.',
-        properties: {
-          id: { type: 'string' },
-          address: { type: 'string' },
-          latitude: { type: 'number' },
-          longitude: { type: 'number' },
-          status: {
-            type: ['object', 'null'],
-            properties: {
-              timestamp: {
-                type: 'number'
-              },
-              status_text: {
-                type: 'string'
-              }
-            }
-          }
+      200: meterInfoSchema
+    },
+    params: meterIdParamsSchema
+  },
+  handler: async (req) => getMeterById(req.params.id)
+})
+
+type MeterUpdateBody = {
+  status: 'maintenance'|'available'|'unknown'|'out-of-service'|'occupied'
+}
+type MeterUpdateParams = {
+  id: string
+}
+
+
+app.route<{ Body: MeterUpdateBody, Params: MeterUpdateParams }>({
+  method: 'POST',
+  url: '/meters/:id',
+  schema: {
+    params: meterIdParamsSchema,
+    body: {
+      type: 'object',
+      properties: {
+        status: {
+          enum: ['maintenance', 'available', 'unknown', 'out-of-service', 'occupied']
         }
       }
     },
-    params: {
-      type: 'object',
-      properties: {
-        id: {
-          description: 'The meter ID',
-          type: 'string'
-        }
-      }
+    response: {
+      200: meterInfoSchema
     }
   },
-  handler: async (req) => {
-    const meterId = req.params.id
+  handler: async (req, reply) => {
+    const { status } = req.body
+    const { id } = req.params
 
-    const meter = await prisma.meter.findUnique({
-      where: {
-        id: meterId
-      },
-      include: {
-        meter_update: {
-          take: 1,
-          orderBy: {
-            timestamp: 'desc'
-          }
-        }
+    await prisma.meter_update.create({
+      data: {
+        meter_id: id,
+        status_text: status,
+        timestamp: new Date()
       }
     })
 
-    console.log('found meter', meter)
-
-    if (!meter) {
-      return {}
-    } else {
-      const {
-        meter_update,
-        id,
-        latitude,
-        longitude,
-        address
-      } = meter
-
-      return {
-        status: meter_update[0] ? { status_text: meter_update[0].status_text, timestamp: meter_update[0].timestamp } : null,
-        id,
-        latitude,
-        longitude,
-        address
-      }
-    }
-
+    return getMeterById(id)
   }
 })
 
 signals.forEach((sig: string) => {
   process.on(sig, () => {
-    console.log(`exiting due to ${sig}`)
+    app.log.info(`exiting due to ${sig}`)
     process.exit(0)
   })
 });
@@ -245,5 +268,5 @@ app.listen(HTTP_PORT, '0.0.0.0', (err) => {
     throw err
   }
 
-  console.log(`listening on 0.0.0.0:${HTTP_PORT}`)
+  app.log.info(`listening on 0.0.0.0:${HTTP_PORT}`)
 });
