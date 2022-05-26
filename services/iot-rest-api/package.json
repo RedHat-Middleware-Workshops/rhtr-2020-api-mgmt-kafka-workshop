@@ -13,6 +13,7 @@
     "start": "node dist/script.js"
   },
   "dependencies": {
+    "@fastify/cors": "^7.0.0",
     "@fastify/swagger": "^6.0.1",
     "@prisma/client": "^3.14.0",
     "env-var": "^7.1.1",

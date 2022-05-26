@@ -2,6 +2,7 @@ require('make-promises-safe')
 
 import { meter, meter_update, PrismaClient } from '@prisma/client'
 import { SwaggerOptions } from '@fastify/swagger'
+import { FastifyCorsOptions } from '@fastify/cors'
 import fastify from 'fastify'
 import config, { DATABASE_URL, HTTP_PORT, NODE_ENV } from './config'
 
@@ -120,6 +121,10 @@ const opts: SwaggerOptions = {
 }
 
 app.register(require('@fastify/swagger'), opts)
+app.register(require('@fastify/cors'), {
+  // Enable CORS in dev mode
+  origin: NODE_ENV === 'dev'
+} as FastifyCorsOptions)
 
 app.route<{ Querystring: GetMetersQuery }>({
   method: 'GET',
