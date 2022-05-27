@@ -2,28 +2,32 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+The meter icon is by Freepik<a href="https://www.flaticon.com/free-icons/meter" title="meter icons">on Flaticon</a>.
+
 ## Local Development
 
 These local development steps assume you've already
 
-1. Create a `.env.local` file based on the `env.local.template`.
-1. Run `npm install`.
-1. Run `npm start`.
+1. Create a `.env.local` file based on the `env.local.template`
+1. Run `npm install`
+1. Run `npm start`
 
 ## Deploying on OpenShift
 
 ```bash
 # Builder image and source code
+export BRANCH='#2022-refresh'
 export BUILDER=quay.io/evanshortiss/s2i-nodejs-nginx:latest
-export SOURCE=https://github.com/evanshortiss/rhoam-openid-connect-examples
+export SOURCE="https://github.com/RedHat-Middleware-Workshops/rhtr-2020-api-mgmt-kafka-workshop$BRANCH"
 
 # Keycloak specific configs, used by the Keycloak JS adapter
+# IMPORTANT: no trailing slash after the "auth" in KEYCLOAK_URL
 export KEYCLOAK_URL=https://keycloak-server-url.com/auth
 export KEYCLOAK_REALM=name-of-realm
 export KEYCLOAK_CLIENT_ID=name-of-client
 
-# Protected product API host, used to fetch products
-export PRODUCT_API_URL=https://products-3scale-apicast-production.example-cluster.com
+# Protected API host, used to fetch meters
+export API_URL=https://path.to-meters.com/
 
 
 oc new-app $BUILDER~$SOURCE \
@@ -32,7 +36,7 @@ oc new-app $BUILDER~$SOURCE \
 --build-env REACT_APP_KEYCLOAK_URL=$KEYCLOAK_URL \
 --build-env REACT_APP_KEYCLOAK_REALM=$KEYCLOAK_REALM \
 --build-env REACT_APP_KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID \
---build-env REACT_APP_PRODUCT_API_URL=$PRODUCT_API_URL \
+--build-env REACT_APP_API_URL=$API_URL \
 --build-env BUILD_OUTPUT_DIR=build \
 --name client-webapp
 

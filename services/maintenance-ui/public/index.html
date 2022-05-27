@@ -24,10 +24,15 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>OpenShift API Management - Parking Maintenance</title>
+    <style>
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
   </head>
-  <body class="text-white bg-gray-900 antialiased">
+  <body class="antialiased">
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!--
