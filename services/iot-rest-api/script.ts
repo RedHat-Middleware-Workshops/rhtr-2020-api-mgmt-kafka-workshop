@@ -153,6 +153,13 @@ app.route<{ Querystring: GetMetersQuery }>({
     }
   },
   handler: async (req) => {
+    /**
+     * This query does not take into account that some meters may not yet have
+     * a status.
+     *
+     * A better, but ugly, raw SQL query is available here https://gist.github.com/evanshortiss/ddcffaef631b61e6a42ccb46f90d3cd2#fetch-all-meters-with-given-status
+     * This raw query works if you change meter_info => meter and meter_status_evals01 => meter_update
+     */
     const { page = 1, search, status } = req.query
     const pageSize = 50
 
@@ -160,11 +167,11 @@ app.route<{ Querystring: GetMetersQuery }>({
       take: pageSize,
       skip: pageSize * page,
       // Perform text search on the address if "search" is present in query
-      where: search ? {
+      where: {
         address: {
-          search: search.split(' ').join(' & ')
+          search: search
         }
-      } : undefined,
+      },
 
       include: {
         meter_update: {
